@@ -64,6 +64,25 @@ To remove the operator (assuming there are no operator-derived instances)...
     is described simply to illustrate a 'clean-up' - you would not
     normally remove an Application operator in a production environment.
 
+### Deploying to the official cluster
+The parameters used to deploy the operator to our 'official' cluster
+are held in this repository as Ansible vault files. They can be used and edited
+in-place.
+
+Choose the _staging_ or _production_ deployment, then, to view or edit: -
+
+    $ export PARAMS=staging
+    $ ansible-vault edit ${PARAMS}-parameters.yaml.vault
+    Vault password: [...]
+
+To deploy: -
+
+    $ ansible-playbook --ask-vault-pass \
+        -e @${PARAMS}-parameters.yaml.vault site.yaml
+
+>   You will need the vault password, held in the company's KeePass under
+    `data-manager-jupyter-operator -> Ansible Vault Password`
+
 # Data Manager Application Compliance
 In order to expose the CRD as an _Application_ in the Data Manager API service
 you will need to a) annotate the CRD and b) provide a **Role** and
