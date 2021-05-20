@@ -1,0 +1,86 @@
+---
+kind: CustomResourceDefinition
+apiVersion: apiextensions.k8s.io/v1
+metadata:
+  name: jupyternotebooks.squonk.it
+  annotations:
+    data-manager.informaticsmatters.com/application: 'yes'
+    data-manager.informaticsmatters.com/application-url-location: jupyter.notebook.url
+spec:
+  conversion:
+    strategy: None
+  group: squonk.it
+  names:
+    kind: JupyterNotebook
+    listKind: JupyterNotebookList
+    plural: jupyternotebooks
+    singular: jupyternotebook
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: URL for acessing the Jupyter notebook.
+      jsonPath: .status.jupyter.notebook.url
+      name: URL
+      type: string
+    - description: Token for accessing the Jupyter notebook.
+      jsonPath: .status.jupyter.notebook.token
+      name: Token
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              deployment:
+                type: object
+                properties:
+                  image:
+                    type: string
+                  resources:
+                    type: object
+                    properties:
+                      limits:
+                        type: object
+                        properties:
+                          memory:
+                            type: string
+                          storage:
+                            type: string
+                      requests:
+                        type: object
+                        properties:
+                          memory:
+                            type: string
+                          storage:
+                            type: string
+                  serviceAccountName:
+                    type: string
+                  securityContext:
+                    type: object
+                    properties:
+                      runAsUser:
+                        type: integer
+                      runAsGroup:
+                        type: integer
+                      fsGroup:
+                        type: integer
+              notebook:
+                type: object
+                properties:
+                  interface:
+                    type: string
+              storage:
+                type: object
+                properties:
+                  claimName:
+                    type: string
+                  subPath:
+                    type: string
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+    served: true
+    storage: true

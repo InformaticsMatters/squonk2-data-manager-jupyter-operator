@@ -1,0 +1,42 @@
+---
+
+# Check the Data Manager Namespace.
+# If it's not present, there's no namespace material to remove.
+
+- name: Get Data Manager Namespace
+  community.kubernetes.k8s_info:
+    kind: Namespace
+    name: "{{ jo_dmapi_namespace }}"
+  register: ns_result
+
+- name: Remove operator material
+  block:
+
+  - name: Remove operator objects
+    community.kubernetes.k8s:
+      definition: "{{ lookup('template', '{{ item }}.yaml.j2') }}"
+      wait: yes
+      state: absent
+    loop:
+    - deployment
+    - rbac
+    - sa
+
+  - name: Remove operator Data Manager API RBAC
+    community.kubernetes.k8s:
+      definition: "{{ lookup('template', '{{ item }}.yaml.j2') }}"
+      wait: yes
+      state: absent
+    loop:
+    - rbac-data-manager
+
+  when: ns_result.resources|length == 1
+
+# The CRD is cluster-scoped.
+# Always try to delete this.
+
+- name: Remove CRD
+  community.kubernetes.k8s:
+    definition: "{{ lookup('file', 'crd.yaml') }}"
+    wait: yes
+    state: absent

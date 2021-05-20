@@ -1,0 +1,34 @@
+---
+
+# Operator state?
+# One of 'present' or 'absent'
+jo_state: present
+
+# The kubernetes config file.
+jo_kubeconfig: SetMe
+
+# The Operator container image and tag
+jo_image: informaticsmatters/data-manager-jupyter-operator
+jo_image_tag: SetMe
+
+# The domain routed to the Cluster.
+# Used as the base for the Jupyter Notebook ingresses.
+# The notebook will be placed on a path, with all notebooks
+# sharing the same domain.
+jo_ingress_domain: example.com
+# A pre-defined ingres TLS secret?
+# If one is named it is used by the notebook ingress
+# and the cert-manager annotation is removed.
+# This is passed to the operator through the environment.
+jo_ingress_tls_secret: ''
+# A certificate issuer (ignored if jo_ingress_tls_secret is set)
+jo_ingress_cert_issuer: letsencrypt-nginx-production
+
+# The namespace the Data Manager API is using
+# nd where the operator will be located.
+# This namespace is expected to exist.
+jo_dmapi_namespace: data-manager-api-staging
+
+# The Data Manager API Service Account name.
+# This account is expected to exist.
+jo_dmapi_sa: data-manager

@@ -1,0 +1,2 @@
+kopf == 1.31.0
+kubernetes == 17.17.0

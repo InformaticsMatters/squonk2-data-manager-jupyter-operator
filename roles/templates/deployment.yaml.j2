@@ -1,0 +1,37 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  namespace: {{ jo_dmapi_namespace }}
+  name: jupyternotebooks-operator
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      application: jupyternotebooks-operator
+  template:
+    metadata:
+      labels:
+        application: jupyternotebooks-operator
+    spec:
+      serviceAccountName: jupyternotebooks-account
+      containers:
+      - name: jupyternotebooks-operator
+        image: {{ jo_image }}:{{ jo_image_tag }}
+{% if jo_image_tag in ['stable', 'latest'] %}
+        imagePullPolicy: Always
+{% else %}
+        imagePullPolicy: IfNotPresent
+{% endif %}
+        env:
+        - name: INGRESS_DOMAIN
+          value: {{ jo_ingress_domain }}
+{% if jo_ingress_tls_secret %}
+        - name: INGRESS_TLS_SECRET
+          value: {{ jo_ingress_tls_secret }}
+{% else %}
+        - name: INGRESS_CERT_ISSUER
+          value: {{ jo_ingress_cert_issuer }}
+{% endif %}

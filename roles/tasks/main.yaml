@@ -1,0 +1,15 @@
+---
+
+- include_tasks: prep.yaml
+
+- name: Deploy using Kubernetes config
+  block:
+
+  - include_tasks: deploy.yaml
+    when: jo_state|string == 'present'
+  - include_tasks: undeploy.yaml
+    when: jo_state|string == 'absent'
+
+  module_defaults:
+    group/k8s:
+      kubeconfig: "{{ jo_kubeconfig }}"

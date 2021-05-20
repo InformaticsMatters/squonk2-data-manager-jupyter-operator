@@ -1,0 +1,49 @@
+---
+
+# Check the Data Manager Namespace and Service Account exists...
+
+- name: Get Data Manager Namespace
+  community.kubernetes.k8s_info:
+    kind: Namespace
+    name: "{{ jo_dmapi_namespace }}"
+  register: ns_result
+
+- name: Assert Namespace
+  assert:
+    that:
+    - ns_result.resources|length == 1
+
+- name: Get Data Manager ServiceAccount
+  community.kubernetes.k8s_info:
+    kind: ServiceAccount
+    name: "{{ jo_dmapi_sa }}"
+    namespace: "{{ jo_dmapi_namespace }}"
+  register: sa_result
+
+- name: Assert ServiceAccount
+  assert:
+    that:
+    - sa_result.resources|length == 1
+
+# Now we can (safely) deploy the operator
+
+- name: Deploy CRD
+  community.kubernetes.k8s:
+    definition: "{{ lookup('file', 'crd.yaml') }}"
+    wait: yes
+
+- name: Deploy Data Manager API RBAC
+  community.kubernetes.k8s:
+    definition: "{{ lookup('template', '{{ item }}.yaml.j2') }}"
+    wait: yes
+  loop:
+  - rbac-data-manager
+
+- name: Deploy operator objects
+  community.kubernetes.k8s:
+    definition: "{{ lookup('template', '{{ item }}.yaml.j2') }}"
+    wait: yes
+  loop:
+  - sa
+  - rbac
+  - deployment

@@ -1,0 +1,14 @@
+---
+
+# Here we use the Docker Desktop built-in Kubernetes cluster,
+# which has a default domain of 'kubernetes.docker.internal'
+jo_ingress_domain: kubernetes.docker.internal
+jo_ingress_tls_secret: ''
+jo_ingress_cert_issuer: letsencrypt-nginx-production
+# The Data Manager Kubernetes namespace
+jo_dmapi_namespace: data-manager-api
+# The Operator image tag
+jo_image_tag: 1.0.0
+
+# The Kubernetes config file
+jo_kubeconfig: ~/my-kubeconfig-file
