@@ -5,7 +5,21 @@ import string
 import kopf
 import kubernetes
 
-# Some (key) default deployment variables..
+# Pod labels (used primarily for Task-based Pods)
+# Basename for all our labels...
+POD_BASE_LABEL: str = 'data-manager.informaticsmatters.com'
+# A label that identifies the purpose of the pod (task),
+# typically one of 'instance', 'dataset', 'file' and 'job'.
+POD_PURPOSE_LABEL: str = POD_BASE_LABEL + '/purpose'
+# A label that identifies task ID for the Pod.
+# Only present if the Pod has a purpose label.
+POD_INSTANCE_LABEL: str = POD_BASE_LABEL + '/instance'
+
+# The purpose?
+# Here everything's an 'APPLICATION'
+POD_PURPOSE_LABEL_VALUE: str = 'APPLICATION'
+
+# Some (key) default deployment variables...
 default_image = 'jupyter/minimal-notebook:notebook-6.3.0'
 default_sa = 'default'
 default_mem_limit = '512Mi'
@@ -153,7 +167,8 @@ def create(name, uid, namespace, spec, logger, **_):
                 "metadata": {
                     "labels": {
                         "deployment": name,
-                        "data-manager.informaticsmatters.com/instance": name
+                        POD_PURPOSE_LABEL: POD_PURPOSE_LABEL_VALUE,
+                        POD_INSTANCE_LABEL: name
                     }
                 },
                 "spec": {

@@ -11,7 +11,7 @@
 
 This repo contains a Kubernetes _Operator_ based on the [kopf] and [kubernetes]
 Python packages that is used by the **Informatics Matters Data Manager API**
-to create Jupyter Notebooks for the Data manager service.
+to create Jupyter Notebooks for the Data Manager service.
 
 The operator's Custom Resource Definition (CRD) can be found in
 `roles/operator/files`.
