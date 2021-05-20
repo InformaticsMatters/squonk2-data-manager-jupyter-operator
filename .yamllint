@@ -7,7 +7,7 @@ yaml-files:
 
 ignore: |
   .github/
-  roles/jupyter-operator/templates/deployment.yaml.j2
+  roles/operator/templates/deployment.yaml.j2
 
 rules:
   indentation:

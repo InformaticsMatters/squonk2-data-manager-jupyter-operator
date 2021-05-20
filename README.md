@@ -14,7 +14,7 @@ Python packages that is used by the **Informatics Matters Data Manager API**
 to create Jupyter Notebooks for the Data manager service.
 
 The operator's Custom Resource Definition (CRD) can be found in
-`roles/jupyter-operator/files`.
+`roles/operator/files`.
 
 By default, the operator creates instances using the Jupyter image: -
 
@@ -38,12 +38,12 @@ The following will build an operator image with the tag `1.0.0-alpha.1`: -
 
 ## Deploying into the Data Manager API
 We use [Ansible] 3 and community modules in [Ansible Galaxy] as the deployment
-mechanism, using the `jupyter-operator` Ansible role in this repository and a
+mechanism, using the `operator` Ansible role in this repository and a
 Kubernetes config (KUBECONFIG). All of this is done via a suitable Python
 environment using the requirements in the root of the project...
 
-    $ python -m venv ~/.venv/jupyter-operator
-    $ source ~/.venv/jupyter-operator/bin/activate
+    $ python -m venv ~/.venv/data-manager-jupyter-operator
+    $ source ~/.venv/data-manager-jupyter-operator/bin/activate
     $ pip install --upgrade pip
     $ pip install -r requirements.txt
     $ ansible-galaxy install -r requirements.yaml
@@ -83,7 +83,7 @@ You will need: -
     reference: `custom_resource['status']['jupyter']['notebook']['url']`.
 
 >   Our CRD already contains suitable annotations
-    (see `roles/jupyter-operator/files/crd.yaml`), so there's nothing more to
+    (see `roles/operator/files/crd.yaml`), so there's nothing more to
     do here once you've deployed it (using Ansible in our case,
     as described earlier).
 
@@ -129,7 +129,7 @@ and run using a user and group that is assigned by the Data Manager API.
 
 >   See our handling of these values in the `create()` function
     of our `operator/handlers.py` and their definitions
-    in `roles/jupyter-operator/files/crd.yaml`
+    in `roles/operator/files/crd.yaml`
 
 ## Storage volume
 In order to place Data-Manager Project files the **CRD** must
@@ -141,7 +141,7 @@ expose the following properties through its schema's: -
 These will be expected to provide a suitable volume mount within the
 application **Pod** for the Project files.
 
->   See our use of these values in `roles/jupyter-operator/files/crd.yaml`.
+>   See our use of these values in `roles/operator/files/crd.yaml`.
 
 ## Instance certificate variables
 Applications can use the DM-API ingress, if they use path-based routing,
