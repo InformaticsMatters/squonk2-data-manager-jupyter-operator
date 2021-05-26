@@ -1,1 +1,5 @@
 ---
+
+# The Data Manager API Service Account name.
+# This account is expected to exist.
+jo_dmapi_sa: data-manager

@@ -28,7 +28,3 @@ jo_ingress_cert_issuer: letsencrypt-nginx-production
 # nd where the operator will be located.
 # This namespace is expected to exist.
 jo_dmapi_namespace: data-manager-api-staging
-
-# The Data Manager API Service Account name.
-# This account is expected to exist.
-jo_dmapi_sa: data-manager

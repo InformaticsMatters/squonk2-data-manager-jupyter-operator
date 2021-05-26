@@ -23,10 +23,10 @@ By default, the operator creates instances using the Jupyter image: -
 Prerequisites: -
 
 -   Python (ideally 3.9.x)
--   docker-compose
+-   Docker
 -   A kubernetes config file
 
-## Building the operator
+## Building the operator (local development)
 The operator container, residing in the `operator` directory,
 is automatically built and pushed to Docker Hub using GitHub Actions.
 
@@ -140,8 +140,8 @@ The Custom Resource must expose properties that allow a custom
 able to access the Data Manager Project files. The Data-Manager API will
 expect to provide the following properties through the **CRD** schema's: -
 
--   `spec.deployment.securityContext.runAsUser`
--   `spec.deployment.securityContext.runAsGroup`
+-   `spec.securityContext.runAsUser`
+-   `spec.securityContext.runAsGroup`
 
 To run successfully the container must be able to run without privileges
 and run using a user and group that is assigned by the Data Manager API.
@@ -154,8 +154,8 @@ and run using a user and group that is assigned by the Data Manager API.
 In order to place Data-Manager Project files the **CRD** must
 expose the following properties through its schema's: -
 
--   `spec.storage.claimName`
--   `spec.storage.subPath`
+-   `spec.project.claimName`
+-   `spec.project.id`
 
 These will be expected to provide a suitable volume mount within the
 application **Pod** for the Project files.

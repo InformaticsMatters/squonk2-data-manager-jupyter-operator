@@ -26,7 +26,7 @@ spec:
       jsonPath: .status.jupyter.notebook.token
       name: Token
       type: string
-    name: v1alpha1
+    name: v1alpha2
     schema:
       openAPIV3Schema:
         type: object
@@ -34,50 +34,49 @@ spec:
           spec:
             type: object
             properties:
-              deployment:
+              taskId:
+                type: string
+              image:
+                type: string
+              resources:
                 type: object
                 properties:
-                  image:
-                    type: string
-                  resources:
+                  limits:
                     type: object
                     properties:
-                      limits:
-                        type: object
-                        properties:
-                          memory:
-                            type: string
-                          storage:
-                            type: string
-                      requests:
-                        type: object
-                        properties:
-                          memory:
-                            type: string
-                          storage:
-                            type: string
-                  serviceAccountName:
-                    type: string
-                  securityContext:
+                      memory:
+                        type: string
+                      storage:
+                        type: string
+                  requests:
                     type: object
                     properties:
-                      runAsUser:
-                        type: integer
-                      runAsGroup:
-                        type: integer
-                      fsGroup:
-                        type: integer
+                      memory:
+                        type: string
+                      storage:
+                        type: string
+              serviceAccountName:
+                type: string
+              securityContext:
+                type: object
+                properties:
+                  runAsUser:
+                    type: integer
+                  runAsGroup:
+                    type: integer
+                  fsGroup:
+                    type: integer
               notebook:
                 type: object
                 properties:
                   interface:
                     type: string
-              storage:
+              project:
                 type: object
                 properties:
                   claimName:
                     type: string
-                  subPath:
+                  id:
                     type: string
           status:
             type: object

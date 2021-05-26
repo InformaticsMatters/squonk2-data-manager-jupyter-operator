@@ -10,5 +10,5 @@ jo_dmapi_namespace: data-manager-api
 # The Operator image tag
 jo_image_tag: 1.0.0
 
-# The Kubernetes config file
-jo_kubeconfig: ~/my-kubeconfig-file
+# The Kubernetes config file (yours will be different)
+jo_kubeconfig: ~/config-docker-desktop

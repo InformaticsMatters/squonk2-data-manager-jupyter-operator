@@ -14,6 +14,9 @@ POD_PURPOSE_LABEL: str = POD_BASE_LABEL + '/purpose'
 # A label that identifies task ID for the Pod.
 # Only present if the Pod has a purpose label.
 POD_INSTANCE_LABEL: str = POD_BASE_LABEL + '/instance'
+# A label that identifies task ID for the Pod.
+# Only present if the Pod has a purpose label.
+POD_TASK_ID_LABEL: str = POD_BASE_LABEL + '/task-id'
 
 # The purpose?
 # Here everything's an 'APPLICATION'
@@ -122,14 +125,15 @@ def create(name, uid, namespace, spec, logger, **_):
 
     notebook_interface = spec.get("notebook", {}).get("interface", "lab")
 
-    image = spec.get("deployment", {}).get("image", default_image)
-    service_account = spec.get("deployment", {})\
-        .get("serviceAccountName", default_sa)
+    image = spec.get("image", default_image)
+    service_account = spec.get("serviceAccountName", default_sa)
 
-    memory_limit = spec.get("deployment", {}).get("resources", {})\
+    memory_limit = spec.get("resources", {})\
         .get("limits", {}).get("memory", default_mem_limit)
-    memory_request = spec.get("deployment", {}).get("resources", {})\
+    memory_request = spec.get("resources", {})\
         .get("requests", {}).get("memory", memory_limit)
+
+    task_id: str = spec.get('taskId')
 
     # Data Manager API compliance.
     #
@@ -139,10 +143,12 @@ def create(name, uid, namespace, spec, logger, **_):
     # We use the supplied group ID and pass that into the container
     # as the Kubernetes 'File System Group' (fsGroup).
     # This should allow us to run and manipulate the files.
-    sc_run_as_user = spec.get("deployment", {}).get("securityContext", {})\
-        .get("runAsUser", default_user_id)
-    sc_run_as_group = spec.get("deployment", {}).get("securityContext", {})\
-        .get("runAsGroup", default_group_id)
+    sc_run_as_user = spec.get("securityContext", {}).get("runAsUser", default_user_id)
+    sc_run_as_group = spec.get("securityContext", {}).get("runAsGroup", default_group_id)
+
+    # Project storage
+    project_claim_name = spec.get("project", {}).get("claimName")
+    project_id = spec.get("project", {}).get("id")
 
     deployment_body = {
         "apiVersion": "apps/v1",
@@ -168,7 +174,8 @@ def create(name, uid, namespace, spec, logger, **_):
                     "labels": {
                         "deployment": name,
                         POD_PURPOSE_LABEL: POD_PURPOSE_LABEL_VALUE,
-                        POD_INSTANCE_LABEL: name
+                        POD_INSTANCE_LABEL: name,
+                        POD_TASK_ID_LABEL: task_id
                     }
                 },
                 "spec": {
@@ -203,6 +210,11 @@ def create(name, uid, namespace, spec, logger, **_):
                                     "name": "config",
                                     "mountPath": "/home/jovyan/.jupyter/jupyter_notebook_config.json",
                                     "subPath": "jupyter_notebook_config.json"
+                                },
+                                {
+                                    "name": "project",
+                                    "mountPath": "/home/jovyan",
+                                    "subPath": project_id
                                 }
                             ]
                         }
@@ -224,6 +236,12 @@ def create(name, uid, namespace, spec, logger, **_):
                             "configMap": {
                                 "name": "config-%s" % name
                             }
+                        },
+                        {
+                            "name": "project",
+                            "persistentVolumeClaim": {
+                                "claimName": project_claim_name
+                            }
                         }
                     ]
                 },
@@ -231,24 +249,12 @@ def create(name, uid, namespace, spec, logger, **_):
         },
     }
 
-    # To simplify the dynamic adjustments we're about to make...
-    deployment_spec = deployment_body["spec"]["template"]["spec"]
+    # To simplify the dynamic ENV adjustments we're about to make...
+    c_env = deployment_body["spec"]["template"]["spec"]["containers"][0]["env"]
 
     if notebook_interface != "classic":
-        deployment_spec["containers"][0]["env"].append({"name": "JUPYTER_ENABLE_LAB",
-                                                        "value": "true"})
-
-    storage_claim_name = spec.get("storage", {}).get("claimName", "")
-    storage_sub_path = spec.get("storage", {}).get("subPath", "")
-
-    volume = {"name": "data",
-              "persistentVolumeClaim": {"claimName": storage_claim_name}}
-    deployment_spec["volumes"].append(volume)
-
-    storage_mount = {"name": "data",
-                     "mountPath": "/home/jovyan",
-                     "subPath": storage_sub_path}
-    deployment_spec["containers"][0]["volumeMounts"].append(storage_mount)
+        c_env.append({"name": "JUPYTER_ENABLE_LAB",
+                      "value": "true"})
 
     kopf.adopt(deployment_body)
     apps_api = kubernetes.client.AppsV1Api()
@@ -356,21 +362,19 @@ def create(name, uid, namespace, spec, logger, **_):
             "token": token,
             "interface": notebook_interface,
         },
-        "deployment": {
-            "image": image,
-            "serviceAccountName": service_account,
-            "resources": {
-                "requests": {
-                    "memory": memory_request
-                },
-                "limits": {
-                    "memory": memory_limit
-                }
+        "image": image,
+        "serviceAccountName": service_account,
+        "resources": {
+            "requests": {
+                "memory": memory_request
+            },
+            "limits": {
+                "memory": memory_limit
             }
         },
-        "storage": {
-            "claimName": storage_claim_name,
-            "subPath": storage_sub_path
+        "project": {
+            "claimName": project_claim_name,
+            "id": project_id
         }
     }
 
