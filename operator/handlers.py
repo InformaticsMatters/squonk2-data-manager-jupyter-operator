@@ -73,7 +73,7 @@ notebook_config = """{
 """
 
 
-@kopf.on.create("squonk.it", "v1alpha1", "jupyternotebooks", id="jupyter")
+@kopf.on.create("squonk.it", "v1alpha3", "jupyternotebooks", id="jupyter")
 def create(name, uid, namespace, spec, logger, **_):
 
     characters = string.ascii_letters + string.digits
@@ -379,7 +379,7 @@ def create(name, uid, namespace, spec, logger, **_):
     }
 
 
-@kopf.on.delete("squonk.it", "v1alpha1", "jupyternotebooks")
+@kopf.on.delete("squonk.it", "v1alpha3", "jupyternotebooks")
 def delete(body, **kwargs): 
     msg = f"Jupyter notebook {body['metadata']['name']} deleted"
     return {'message': msg}
