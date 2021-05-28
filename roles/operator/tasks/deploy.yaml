@@ -2,7 +2,7 @@
 
 # Check the Data Manager Namespace and Service Account exists...
 
-- name: Get Data Manager Namespace
+- name: Get Data Manager Namespace ({{ jo_dmapi_namespace }})
   community.kubernetes.k8s_info:
     kind: Namespace
     name: "{{ jo_dmapi_namespace }}"

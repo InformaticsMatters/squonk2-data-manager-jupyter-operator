@@ -3,7 +3,7 @@
 # Check the Data Manager Namespace.
 # If it's not present, there's no namespace material to remove.
 
-- name: Get Data Manager Namespace
+- name: Get Data Manager Namespace ({{ jo_dmapi_namespace }})
   community.kubernetes.k8s_info:
     kind: Namespace
     name: "{{ jo_dmapi_namespace }}"
