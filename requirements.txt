@@ -1,3 +1,2 @@
-ansible == 3.4.0
+ansible == 4.0.0
 docker-compose == 1.29.2
-openshift == 0.12.0
