@@ -25,7 +25,8 @@ POD_PURPOSE_LABEL_VALUE: str = 'APPLICATION'
 # Some (key) default deployment variables...
 default_image = 'jupyter/minimal-notebook:notebook-6.3.0'
 default_sa = 'default'
-default_mem_limit = '512Mi'
+default_cpu_limit = '1'
+default_mem_limit = '1Gi'
 default_user_id = 1000
 default_group_id = 100
 
@@ -128,10 +129,11 @@ def create(name, uid, namespace, spec, logger, **_):
     image = spec.get("image", default_image)
     service_account = spec.get("serviceAccountName", default_sa)
 
-    memory_limit = spec.get("resources", {})\
-        .get("limits", {}).get("memory", default_mem_limit)
-    memory_request = spec.get("resources", {})\
-        .get("requests", {}).get("memory", memory_limit)
+    resources = spec.get("resources", {})
+    cpu_limit = resources.get("limits", {}).get("cpu", default_cpu_limit)
+    cpu_request = resources.get("requests", {}).get("cpu", cpu_limit)
+    memory_limit = resources.get("limits", {}).get("memory", default_mem_limit)
+    memory_request = resources.get("requests", {}).get("memory", memory_limit)
 
     task_id: str = spec.get('taskId')
 
@@ -187,10 +189,12 @@ def create(name, uid, namespace, spec, logger, **_):
                             "imagePullPolicy": "Always",
                             "resources": {
                                 "requests": {
-                                    "memory": memory_request
+                                    "memory": memory_request,
+                                    "cpu": cpu_request
                                 },
                                 "limits": {
-                                    "memory": memory_limit
+                                    "memory": memory_limit,
+                                    "cpu": cpu_limit
                                 }
                             },
                             "ports": [
