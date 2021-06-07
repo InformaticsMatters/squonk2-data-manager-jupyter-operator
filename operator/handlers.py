@@ -212,8 +212,7 @@ def create(name, uid, namespace, spec, logger, **_):
                                 },
                                 {
                                     "name": "config",
-                                    "mountPath": "/home/jovyan/.jupyter/jupyter_notebook_config.json",
-                                    "subPath": "jupyter_notebook_config.json"
+                                    "mountPath": "/home/jovyan/.jupyter"
                                 },
                                 {
                                     "name": "project",
