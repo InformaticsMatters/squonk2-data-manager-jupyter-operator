@@ -212,7 +212,12 @@ def create(name, uid, namespace, spec, logger, **_):
                                     "protocol": "TCP",
                                 }
                             ],
-                            "env": [],
+                            "env": [
+                                {
+                                    "name": "HOME",
+                                    "value": "/home/jovyan/." + name
+                                }
+                            ],
                             "volumeMounts": [
                                 {
                                     "name": "startup",
