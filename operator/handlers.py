@@ -61,10 +61,18 @@ if [ -d $HOME/.conda/envs/workspace ]; then
     echo "Activate virtual environment 'workspace'."
     conda activate workspace
 fi
+
+mkdir -p $HOME/.jupyter
+if [ ! -f $HOME/.jupyter/jupyter_notebook_config.json ]; then
+    echo "Copying config into place"
+    cp /etc/jupyter_notebook_config.json $HOME/.jupyter
+fi
 """
 
 # The Jupyter jupyter_notebook_config.json file.
-# A ConfigMap written into the directory '$HOME/.jupyter'
+# A ConfigMap whose content is written into '/etc'
+# and copied to the $HOME/.jupyter by the notebook_startup
+# script (above).
 notebook_config = """{
   "NotebookApp": {
     "token": "%(token)s",
@@ -212,7 +220,8 @@ def create(name, uid, namespace, spec, logger, **_):
                                 },
                                 {
                                     "name": "config",
-                                    "mountPath": "/home/jovyan/.jupyter"
+                                    "mountPath": "/etc/jupyter_notebook_config.json",
+                                    "subPath": "jupyter_notebook_config.json"
                                 },
                                 {
                                     "name": "project",
