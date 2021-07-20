@@ -44,6 +44,8 @@ spec:
                   limits:
                     type: object
                     properties:
+                      cpu:
+                        type: string
                       memory:
                         type: string
                       storage:
@@ -51,6 +53,8 @@ spec:
                   requests:
                     type: object
                     properties:
+                      cpu:
+                        type: string
                       memory:
                         type: string
                       storage:
