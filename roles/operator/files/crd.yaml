@@ -34,54 +34,63 @@ spec:
           spec:
             type: object
             properties:
-              taskId:
-                type: string
-              image:
-                type: string
-              resources:
+              # All DataManager-injected material
+              # will be namespaced by the property 'imDataManager'
+              imDataManager:
                 type: object
                 properties:
-                  limits:
+                  taskId:
+                    type: string
+                  image:
+                    type: string
+                  resources:
                     type: object
                     properties:
-                      cpu:
-                        type: string
-                      memory:
-                        type: string
-                      storage:
-                        type: string
-                  requests:
+                      limits:
+                        type: object
+                        properties:
+                          cpu:
+                            type: string
+                          memory:
+                            type: string
+                          storage:
+                            type: string
+                      requests:
+                        type: object
+                        properties:
+                          cpu:
+                            type: string
+                          memory:
+                            type: string
+                          storage:
+                            type: string
+                  serviceAccountName:
+                    type: string
+                  securityContext:
                     type: object
                     properties:
-                      cpu:
+                      runAsUser:
+                        type: integer
+                      runAsGroup:
+                        type: integer
+                      fsGroup:
+                        type: integer
+                  notebook:
+                    type: object
+                    properties:
+                      interface:
                         type: string
-                      memory:
+                  project:
+                    type: object
+                    properties:
+                      claimName:
                         type: string
-                      storage:
+                      id:
                         type: string
-              serviceAccountName:
-                type: string
-              securityContext:
-                type: object
-                properties:
-                  runAsUser:
-                    type: integer
-                  runAsGroup:
-                    type: integer
-                  fsGroup:
-                    type: integer
-              notebook:
-                type: object
-                properties:
-                  interface:
-                    type: string
-              project:
-                type: object
-                properties:
-                  claimName:
-                    type: string
-                  id:
-                    type: string
+                  labels:
+                    type: array
+                    items:
+                      type: string
           status:
             type: object
             x-kubernetes-preserve-unknown-fields: true

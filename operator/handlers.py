@@ -1,6 +1,7 @@
 import os
 import random
 import string
+from typing import Dict
 
 import kopf
 import kubernetes
@@ -132,18 +133,22 @@ def create(name, uid, namespace, spec, logger, **_):
     # Deployment
     # ----------
 
-    notebook_interface = spec.get("notebook", {}).get("interface", "lab")
+    # All Data-Manager provided material
+    # will be namespaced under the 'imDataManager' property
+    material: Dict[str, any] = spec.get('imDataManager', {})
 
-    image = spec.get("image", default_image)
-    service_account = spec.get("serviceAccountName", default_sa)
+    notebook_interface = material.get("notebook", {}).get("interface", "lab")
 
-    resources = spec.get("resources", {})
+    image = material.get("image", default_image)
+    service_account = material.get("serviceAccountName", default_sa)
+
+    resources = material.get("resources", {})
     cpu_limit = resources.get("limits", {}).get("cpu", default_cpu_limit)
     cpu_request = resources.get("requests", {}).get("cpu", cpu_limit)
     memory_limit = resources.get("limits", {}).get("memory", default_mem_limit)
     memory_request = resources.get("requests", {}).get("memory", memory_limit)
 
-    task_id: str = spec.get('taskId')
+    task_id: str = material.get('taskId')
 
     # Data Manager API compliance.
     #
@@ -153,12 +158,12 @@ def create(name, uid, namespace, spec, logger, **_):
     # We use the supplied group ID and pass that into the container
     # as the Kubernetes 'File System Group' (fsGroup).
     # This should allow us to run and manipulate the files.
-    sc_run_as_user = spec.get("securityContext", {}).get("runAsUser", default_user_id)
-    sc_run_as_group = spec.get("securityContext", {}).get("runAsGroup", default_group_id)
+    sc_run_as_user = material.get("securityContext", {}).get("runAsUser", default_user_id)
+    sc_run_as_group = material.get("securityContext", {}).get("runAsGroup", default_group_id)
 
     # Project storage
-    project_claim_name = spec.get("project", {}).get("claimName")
-    project_id = spec.get("project", {}).get("id")
+    project_claim_name = material.get("project", {}).get("claimName")
+    project_id = material.get("project", {}).get("id")
 
     deployment_body = {
         "apiVersion": "apps/v1",
@@ -265,6 +270,12 @@ def create(name, uid, namespace, spec, logger, **_):
             },
         },
     }
+
+    # Additional labels?
+    # Provided by the DM as an array of strings of the form '<KEY>=<VALUE>'
+    for label in material.get('labels', []):
+        key, value = label.split('=')
+        deployment_body['metadata']['labels'][key] = value
 
     # To simplify the dynamic ENV adjustments we're about to make...
     c_env = deployment_body["spec"]["template"]["spec"]["containers"][0]["env"]
