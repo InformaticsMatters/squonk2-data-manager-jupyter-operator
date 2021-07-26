@@ -273,9 +273,9 @@ def create(name, uid, namespace, spec, logger, **_):
 
     # Additional labels?
     # Provided by the DM as an array of strings of the form '<KEY>=<VALUE>'
-    for label in material.get('labels', []):
-        key, value = label.split('=')
-        deployment_body['metadata']['labels'][key] = value
+    for label in material.get("labels", []):
+        key, value = label.split("=")
+        deployment_body["spec"]["template"]["metadata"]["labels"][key] = value
 
     # To simplify the dynamic ENV adjustments we're about to make...
     c_env = deployment_body["spec"]["template"]["spec"]["containers"][0]["env"]
