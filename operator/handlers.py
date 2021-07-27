@@ -101,7 +101,7 @@ def create(name, uid, namespace, spec, logger, **_):
             }
         },
         "data": {
-            ".bash_profile": "PS1='$(pwd)$ '"
+            ".bash_profile": "export PS1='$(pwd)$ '"
         }
     }
 
