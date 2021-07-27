@@ -27,8 +27,12 @@ ingress_tls_secret = os.environ.get('INGRESS_TLS_SECRET')
 ingress_cert_issuer = os.environ.get('INGRESS_CERT_ISSUER')
 
 # A startup script.
-# Used in a ConfigMap
-# written into the directory '/usr/local/bin/before-notebook.d'
+# Used in a ConfigMap and written into the directory
+# '/usr/local/bin/before-notebook.d'.
+#
+# As part of the startup we erase the existing '~/.bashrc' and,
+# as a minimum, set a more suitable PS1 (see ch2385).
+# 'conda init' then puts its stuff into the same file.
 notebook_startup = """#!/bin/bash
 echo "PS1='\$(pwd) \$UID$ '" > ~/.bashrc
 conda init
