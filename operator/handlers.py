@@ -51,8 +51,6 @@ if [ ! -f $HOME/.jupyter/jupyter_notebook_config.json ]; then
     echo "Copying config into place"
     cp /etc/jupyter_notebook_config.json $HOME/.jupyter
 fi
-
-export PS1='$(pwd) '
 """
 
 # The Jupyter jupyter_notebook_config.json file.
@@ -101,7 +99,7 @@ def create(name, uid, namespace, spec, logger, **_):
             }
         },
         "data": {
-            ".bash_profile": "export PS1='$(pwd)$ '"
+            ".bash_profile": "export PS1='$(pwd) $UID$ '"
         }
     }
 
@@ -228,7 +226,7 @@ def create(name, uid, namespace, spec, logger, **_):
                                 },
                                 {
                                     "name": "ps1",
-                                    "mountPath": "/home/jovyan/.bash_profile",
+                                    "mountPath": "/home/jovyan/." + name + "/.bash_profile",
                                     "subPath": ".bash_profile"
                                 },
                                 {
