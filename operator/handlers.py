@@ -33,6 +33,7 @@ notebook_startup = """#!/bin/bash
 conda init
 
 source $HOME/.bashrc
+source $HOME/.bash_profile
 
 if [ ! -f $HOME/.condarc ]; then
     cat > $HOME/.condarc << EOF
