@@ -89,6 +89,20 @@ def create(name, uid, namespace, spec, logger, **_):
         }
     }
 
+    ps1_cm_body = {
+        "apiVersion": "v1",
+        "kind": "ConfigMap",
+        "metadata": {
+            "name": "ps1-%s" % name,
+            "labels": {
+                "app": name
+            }
+        },
+        "data": {
+            "01-ps1.sh": "'$(pwd)$ '"
+        }
+    }
+
     config_vars = {'token': token,
                    'base_url': name}
     config_cm_body = {
@@ -106,9 +120,11 @@ def create(name, uid, namespace, spec, logger, **_):
     }
 
     kopf.adopt(startup_cm_body)
+    kopf.adopt(ps1_cm_body)
     kopf.adopt(config_cm_body)
     core_api = kubernetes.client.CoreV1Api()
     core_api.create_namespaced_config_map(namespace, startup_cm_body)
+    core_api.create_namespaced_config_map(namespace, ps1_cm_body)
     core_api.create_namespaced_config_map(namespace, config_cm_body)
 
     logger.debug("Created ConfigMaps")
@@ -201,16 +217,17 @@ def create(name, uid, namespace, spec, logger, **_):
                                 {
                                     "name": "HOME",
                                     "value": "/home/jovyan/." + name
-                                },
-                                {
-                                    "name": "PS1",
-                                    "value": "$(pwd)$ "
                                 }
                             ],
                             "volumeMounts": [
                                 {
                                     "name": "startup",
                                     "mountPath": "/usr/local/bin/before-notebook.d"
+                                },
+                                {
+                                    "name": "ps1",
+                                    "mountPath": "/etc/profile.d/01-ps1.sh",
+                                    "subPath": "01-ps1.sh"
                                 },
                                 {
                                     "name": "config",
@@ -235,6 +252,12 @@ def create(name, uid, namespace, spec, logger, **_):
                             "name": "startup",
                             "configMap": {
                                 "name": "startup-%s" % name
+                            }
+                        },
+                        {
+                            "name": "ps1",
+                            "configMap": {
+                                "name": "ps1-%s" % name
                             }
                         },
                         {
