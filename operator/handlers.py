@@ -33,7 +33,6 @@ notebook_startup = """#!/bin/bash
 conda init
 
 source $HOME/.bashrc
-source $HOME/.bash_profile
 
 if [ ! -f $HOME/.condarc ]; then
     cat > $HOME/.condarc << EOF
@@ -52,6 +51,8 @@ if [ ! -f $HOME/.jupyter/jupyter_notebook_config.json ]; then
     echo "Copying config into place"
     cp /etc/jupyter_notebook_config.json $HOME/.jupyter
 fi
+
+source $HOME/.bash_profile
 """
 
 # The Jupyter jupyter_notebook_config.json file.
@@ -100,7 +101,7 @@ def create(name, uid, namespace, spec, logger, **_):
             }
         },
         "data": {
-            "01-ps1.sh": 'PS1="$(pwd) $UID$ "'
+            ".bash_profile": 'PS1="$(pwd) $UID$ "'
         }
     }
 
@@ -227,8 +228,8 @@ def create(name, uid, namespace, spec, logger, **_):
                                 },
                                 {
                                     "name": "ps1",
-                                    "mountPath": "/tmp/01-ps1.sh",
-                                    "subPath": "01-ps1.sh"
+                                    "mountPath": "/home/jovyan/." + name + "/.bash_profile",
+                                    "subPath": ".bash_profile"
                                 },
                                 {
                                     "name": "config",
