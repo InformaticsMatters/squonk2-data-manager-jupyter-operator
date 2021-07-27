@@ -99,7 +99,7 @@ def create(name, uid, namespace, spec, logger, **_):
             }
         },
         "data": {
-            "01-ps1.sh": "'$(pwd)$ '"
+            "01-ps1.sh": "PS1='$(pwd)$ '"
         }
     }
 
