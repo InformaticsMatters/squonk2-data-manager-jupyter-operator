@@ -30,6 +30,7 @@ ingress_cert_issuer = os.environ.get('INGRESS_CERT_ISSUER')
 # Used in a ConfigMap
 # written into the directory '/usr/local/bin/before-notebook.d'
 notebook_startup = """#!/bin/bash
+echo "PS1='\$(pwd) \$UID$ '" > ~/.bashrc
 conda init
 
 source $HOME/.bashrc
@@ -51,8 +52,6 @@ if [ ! -f $HOME/.jupyter/jupyter_notebook_config.json ]; then
     echo "Copying config into place"
     cp /etc/jupyter_notebook_config.json $HOME/.jupyter
 fi
-
-source $HOME/.bash_profile
 """
 
 # The Jupyter jupyter_notebook_config.json file.
@@ -91,20 +90,6 @@ def create(name, uid, namespace, spec, logger, **_):
         }
     }
 
-    ps1_cm_body = {
-        "apiVersion": "v1",
-        "kind": "ConfigMap",
-        "metadata": {
-            "name": "ps1-%s" % name,
-            "labels": {
-                "app": name
-            }
-        },
-        "data": {
-            ".bash_profile": 'PS1="$(pwd) $UID$ "'
-        }
-    }
-
     config_vars = {'token': token,
                    'base_url': name}
     config_cm_body = {
@@ -122,11 +107,9 @@ def create(name, uid, namespace, spec, logger, **_):
     }
 
     kopf.adopt(startup_cm_body)
-    kopf.adopt(ps1_cm_body)
     kopf.adopt(config_cm_body)
     core_api = kubernetes.client.CoreV1Api()
     core_api.create_namespaced_config_map(namespace, startup_cm_body)
-    core_api.create_namespaced_config_map(namespace, ps1_cm_body)
     core_api.create_namespaced_config_map(namespace, config_cm_body)
 
     logger.debug("Created ConfigMaps")
@@ -227,11 +210,6 @@ def create(name, uid, namespace, spec, logger, **_):
                                     "mountPath": "/usr/local/bin/before-notebook.d"
                                 },
                                 {
-                                    "name": "ps1",
-                                    "mountPath": "/home/jovyan/." + name + "/.bash_profile",
-                                    "subPath": ".bash_profile"
-                                },
-                                {
                                     "name": "config",
                                     "mountPath": "/etc/jupyter_notebook_config.json",
                                     "subPath": "jupyter_notebook_config.json"
@@ -254,12 +232,6 @@ def create(name, uid, namespace, spec, logger, **_):
                             "name": "startup",
                             "configMap": {
                                 "name": "startup-%s" % name
-                            }
-                        },
-                        {
-                            "name": "ps1",
-                            "configMap": {
-                                "name": "ps1-%s" % name
                             }
                         },
                         {
