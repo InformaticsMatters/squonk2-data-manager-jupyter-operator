@@ -1,5 +1,6 @@
 __pycache__
 .idea
+.coverage
 venv
 
 production-parameters.yaml
