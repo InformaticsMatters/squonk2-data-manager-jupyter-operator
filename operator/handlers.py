@@ -201,6 +201,10 @@ def create(name, uid, namespace, spec, logger, **_):
                                 {
                                     "name": "HOME",
                                     "value": "/home/jovyan/." + name
+                                },
+                                {
+                                    "name": "PS1",
+                                    "value": "$(pwd)$ "
                                 }
                             ],
                             "volumeMounts": [
