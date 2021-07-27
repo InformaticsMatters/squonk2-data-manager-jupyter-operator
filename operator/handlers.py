@@ -51,6 +51,8 @@ if [ ! -f $HOME/.jupyter/jupyter_notebook_config.json ]; then
     echo "Copying config into place"
     cp /etc/jupyter_notebook_config.json $HOME/.jupyter
 fi
+
+export PS1='$(pwd) '
 """
 
 # The Jupyter jupyter_notebook_config.json file.
