@@ -99,7 +99,7 @@ def create(name, uid, namespace, spec, logger, **_):
             }
         },
         "data": {
-            "01-ps1.sh": "PS1='$(pwd)$ '"
+            ".bash_profile": "PS1='$(pwd)$ '"
         }
     }
 
@@ -226,8 +226,8 @@ def create(name, uid, namespace, spec, logger, **_):
                                 },
                                 {
                                     "name": "ps1",
-                                    "mountPath": "/etc/profile.d/01-ps1.sh",
-                                    "subPath": "01-ps1.sh"
+                                    "mountPath": "/home/jovyan/.bash_profile",
+                                    "subPath": ".bash_profile"
                                 },
                                 {
                                     "name": "config",
