@@ -227,7 +227,7 @@ def create(name, uid, namespace, spec, logger, **_):
                                 },
                                 {
                                     "name": "ps1",
-                                    "mountPath": "/etc/profile.d/01-ps1.sh",
+                                    "mountPath": "/tmp/01-ps1.sh",
                                     "subPath": "01-ps1.sh"
                                 },
                                 {
