@@ -3,9 +3,9 @@ __pycache__
 .coverage
 venv
 
+integration-parameters.yaml
 production-parameters.yaml
 staging-parameters.yaml
-parameters.yaml
 
 **/*.swp
 **/.DS_Store
