@@ -50,7 +50,7 @@ environment using the requirements in the root of the project...
 
 Set your KUBECONFIG for the cluster and verify its right: -
 
-    $ export KUBECONFIG=~/my-config
+    $ export KUBECONFIG=~/k8s-config/local-config
     $ kubectl get no
     [...]
 
