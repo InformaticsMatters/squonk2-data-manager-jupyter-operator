@@ -11,4 +11,4 @@ jo_dmapi_namespace: data-manager-api
 jo_image_tag: 1.1.3
 
 # The Kubernetes config file (yours will be different)
-jo_kubeconfig: ~/config-docker-desktop
+jo_kubeconfig: ~/k8s-config/config-local
