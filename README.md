@@ -48,6 +48,12 @@ environment using the requirements in the root of the project...
     $ pip install -r requirements.txt
     $ ansible-galaxy install -r requirements.yaml
 
+Set your KUBECONFIG for the cluster and verify its right: -
+
+    $ export KUBECONFIG=~/my-config
+    $ kubectl get no
+    [...]
+
 Now, create a parameter file (i.e. `parameters.yaml`) based on the project's
 `example-parameters.yaml`, setting values for the operator that match your
 needs. Then deploy, using Ansible, from the root of the project: -
@@ -69,7 +75,8 @@ The parameters used to deploy the operator to our 'official' cluster
 are held in this repository as Ansible vault files. They can be used and edited
 in-place.
 
-Choose the _staging_ or _production_ deployment, then, to view or edit: -
+Choose the _integration_, _staging_ or _production_ deployment, then,
+to view or edit: -
 
     $ export PARAMS=staging
     $ ansible-vault edit ${PARAMS}-parameters.yaml.vault
