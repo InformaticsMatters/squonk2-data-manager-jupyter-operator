@@ -5,8 +5,10 @@
 jo_ingress_domain: kubernetes.docker.internal
 jo_ingress_tls_secret: ''
 jo_ingress_cert_issuer: letsencrypt-nginx-production
-# The Data Manager Kubernetes namespace
-jo_dmapi_namespace: data-manager-api
+# The Data Manager Kubernetes name
+# (used as a suffix for the namespace unless it's explicitly named)
+jo_dmapi_name: integration
+jo_dmapi_namespace: data-mamager-api
 # The Operator image tag
 jo_image_tag: 1.1.3
 

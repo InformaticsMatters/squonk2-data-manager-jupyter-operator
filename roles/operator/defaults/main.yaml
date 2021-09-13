@@ -24,7 +24,8 @@ jo_ingress_tls_secret: ''
 # A certificate issuer (ignored if jo_ingress_tls_secret is set)
 jo_ingress_cert_issuer: letsencrypt-nginx-production
 
-# The namespace the Data Manager API is using
-# nd where the operator will be located.
-# This namespace is expected to exist.
-jo_dmapi_namespace: data-manager-api-staging
+# The name (and namespace) of the Data Manager API.
+# The namespace is where the operator will be located,
+# and is expected to exist.
+jo_dmapi_name: integration
+jo_dmapi_namespace: data-manager-api-{{ jo_dmapi_name }}
