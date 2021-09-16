@@ -100,7 +100,11 @@ For the **CRD** to be recognised by the Data Manager API it wil need a number of
 annotations, located in its `metadata -> annotations` block.
 You will need: -
 
--   An annotation `data-manager.informaticsmatters.com/application` set to `'yes'`
+-   An annotation `data-manager.informaticsmatters.com/application`
+    set to `'yes'`
+-   An annotation `data-manager.informaticsmatters.com/application-namespaces`
+    set to a colon-separated list of namespaces the Application is to be used
+    in. e.g `'data-manager-api:data-manager-api-staging'`
 -   An annotation `data-manager.informaticsmatters.com/application-url-location`.
     The url location is the 'status'-relative path in the custom resource
     'status' block where the application URL can be extracted. A value of

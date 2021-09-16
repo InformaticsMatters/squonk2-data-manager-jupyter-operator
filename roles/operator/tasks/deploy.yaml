@@ -29,7 +29,7 @@
 
 - name: Deploy CRD
   community.kubernetes.k8s:
-    definition: "{{ lookup('file', 'crd.yaml') }}"
+    definition: "{{ lookup('template', 'crd.yaml.j2') }}"
     wait: yes
 
 - name: Deploy Data Manager API RBAC

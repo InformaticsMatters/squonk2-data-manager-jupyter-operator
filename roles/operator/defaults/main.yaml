@@ -10,6 +10,9 @@ jo_kubeconfig: SetMe
 # The Operator container image and tag
 jo_image: informaticsmatters/data-manager-jupyter-operator
 jo_image_tag: SetMe
+# The colon-separated list of namespaces
+# we want the CRD to be used with.
+jo_namespaces: data-manager-api
 
 # The domain routed to the Cluster.
 # Used as the base for the Jupyter Notebook ingresses.

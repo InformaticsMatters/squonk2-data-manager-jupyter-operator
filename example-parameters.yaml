@@ -9,6 +9,8 @@ jo_ingress_cert_issuer: letsencrypt-nginx-production
 jo_dmapi_namespace: data-manager-api
 # The Operator image tag
 jo_image_tag: 1.0.0
+# Supported namespaces
+jo_namespaces: data-manager-api:data-manager-api-staging:data-manager-api-integration
 
 # The Kubernetes config file (yours will be different)
 jo_kubeconfig: ~/config-docker-desktop
