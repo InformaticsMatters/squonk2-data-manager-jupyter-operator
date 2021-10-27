@@ -21,17 +21,18 @@ spec:
       # Prefer 'application' nodes before 'core'
       affinity:
         nodeAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 2
-            preference:
-              matchExpressions:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
               - key: informaticsmatters.com/purpose-application
-                operator: Exists
-          - weight: 1
-            preference:
-              matchExpressions:
+                operator: In
+                values:
+                - 'yes'
+            - matchExpressions:
               - key: informaticsmatters.com/purpose-core
-                operator: Exists
+                operator: In
+                values:
+                - 'yes'
 
       containers:
       - name: jupyternotebooks-operator
