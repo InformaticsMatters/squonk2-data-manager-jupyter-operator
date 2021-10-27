@@ -17,6 +17,22 @@ spec:
         application: jupyternotebooks-operator
     spec:
       serviceAccountName: jupyternotebooks-account
+
+      # Prefer 'application' nodes before 'core'
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 2
+            preference:
+              matchExpressions:
+              - key: informaticsmatters.com/purpose-application
+                operator: Exists
+          - weight: 1
+            preference:
+              matchExpressions:
+              - key: informaticsmatters.com/purpose-core
+                operator: Exists
+
       containers:
       - name: jupyternotebooks-operator
         image: {{ jo_image }}:{{ jo_image_tag }}
