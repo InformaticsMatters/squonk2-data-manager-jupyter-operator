@@ -180,6 +180,9 @@ def create(name, uid, namespace, spec, logger, **_):
                 },
                 "spec": {
                     "serviceAccountName": service_account,
+                    'nodeSelector': {
+                        'informaticsmatters.com/purpose-worker': 'yes'
+                    },
                     "containers": [
                         {
                             "name": "notebook",
@@ -187,8 +190,8 @@ def create(name, uid, namespace, spec, logger, **_):
                             "imagePullPolicy": "Always",
                             "resources": {
                                 "requests": {
-                                    "memory": memory_request,
-                                    "cpu": cpu_request
+                                    "memory": "256Mi",
+                                    "cpu": "10m"
                                 },
                                 "limits": {
                                     "memory": memory_limit,
