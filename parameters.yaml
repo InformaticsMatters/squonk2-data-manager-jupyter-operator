@@ -11,7 +11,7 @@ jo_ingress_cert_issuer: letsencrypt-nginx-production
 # The Data Manager Kubernetes name
 # (used as a suffix for the namespace unless it's explicitly named)
 jo_dmapi_name: local
-jo_dmapi_namespace: data-mamager-api
+jo_dmapi_namespace: data-manager-api
 # The Operator image tag
 jo_image_tag: 1.1.4
 
