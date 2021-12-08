@@ -6,6 +6,7 @@ venv
 integration-parameters.yaml
 production-parameters.yaml
 staging-parameters.yaml
+parameters.*
 
 **/*.swp
 **/.DS_Store
