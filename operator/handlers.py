@@ -210,14 +210,6 @@ def create(name, uid, namespace, spec, logger, **_):
                                 {
                                     "name": "HOME",
                                     "value": "/home/jovyan/." + name
-                                },
-                                {
-                                    "name": "NB_UID",
-                                    "value": f"{sc_run_as_user}"
-                                },
-                                {
-                                    "name": "NB_GID",
-                                    "value": f"{sc_run_as_group}"
                                 }
                             ],
                             "volumeMounts": [
@@ -239,7 +231,7 @@ def create(name, uid, namespace, spec, logger, **_):
                         }
                     ],
                     "securityContext": {
-                        "runAsUser": 0,
+                        "runAsUser": sc_run_as_user,
                         "runAsGroup": 100,
                         "fsGroup": sc_run_as_group
                     },
