@@ -212,11 +212,11 @@ def create(name, uid, namespace, spec, logger, **_):
                                 },
                                 {
                                     "name": "NB_UID",
-                                    "value": sc_run_as_user
+                                    "value": f"{sc_run_as_user}"
                                 },
                                 {
                                     "name": "NB_GID",
-                                    "value": sc_run_as_group
+                                    "value": f"{sc_run_as_group}"
                                 }
                             ],
                             "volumeMounts": [
