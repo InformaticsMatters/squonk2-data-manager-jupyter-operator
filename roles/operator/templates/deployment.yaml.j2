@@ -25,14 +25,10 @@ spec:
             nodeSelectorTerms:
             - matchExpressions:
               - key: informaticsmatters.com/purpose-application
-                operator: In
-                values:
-                - 'yes'
+                operator: Exists
             - matchExpressions:
               - key: informaticsmatters.com/purpose-core
-                operator: In
-                values:
-                - 'yes'
+                operator: Exists
 
       containers:
       - name: jupyternotebooks-operator
@@ -51,4 +47,17 @@ spec:
 {% else %}
         - name: INGRESS_CERT_ISSUER
           value: {{ jo_ingress_cert_issuer }}
+{% endif %}
+        resources:
+          requests:
+            cpu: {{ jo_cpu_request }}
+            memory: {{ jo_mem_request }}
+{% if jo_cpu_limit or jo_mem_limit %}
+          limits:
+{% if jo_cpu_limit %}
+            cpu: {{ jo_cpu_limit }}
+{% endif %}
+{% if jo_mem_limit %}
+            memory: {{ jo_mem_limit }}
+{% endif %}
 {% endif %}

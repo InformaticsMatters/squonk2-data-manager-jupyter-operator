@@ -3,3 +3,8 @@
 # The Data Manager API Service Account name.
 # This account is expected to exist.
 jo_dmapi_sa: data-manager
+
+jo_cpu_request: 100m
+jo_mem_request: 128Mi
+jo_cpu_limit: 100m
+jo_mem_limit: 128Mi
