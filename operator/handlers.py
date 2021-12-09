@@ -13,6 +13,7 @@ default_cpu_limit = '1'
 default_mem_limit = '1Gi'
 default_user_id = 1000
 default_group_id = 100
+default_ingress_proxy_body_size = '500m'
 
 # The ingress class
 ingress_class = 'nginx'
@@ -322,6 +323,8 @@ def create(name, uid, namespace, spec, logger, **_):
     # Ingress
     # -------
 
+    ingress_proxy_body_size = material.get("ingressProxyBodySize", default_ingress_proxy_body_size)
+
     ingress_path = f"/{name}"
     tls_secret = ingress_tls_secret if ingress_tls_secret else f"{name}-tls"
 
@@ -335,6 +338,7 @@ def create(name, uid, namespace, spec, logger, **_):
             },
             "annotations": {
                 "kubernetes.io/ingress.class": ingress_class,
+                "nginx.ingress.kubernetes.io/proxy-body-size": f"{ingress_proxy_body_size}"
             }
         },
         "spec": {
