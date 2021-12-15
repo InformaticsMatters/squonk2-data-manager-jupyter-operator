@@ -27,35 +27,42 @@ ingress_tls_secret = os.environ.get('INGRESS_TLS_SECRET')
 # expected if a TLS certificate is not defined.
 ingress_cert_issuer = os.environ.get('INGRESS_CERT_ISSUER')
 
-# A startup script.
-# Used in a ConfigMap and written into the directory
-# '/usr/local/bin/before-notebook.d'.
+# A custom startup script.
+# This is executed as the container "command"
+# It writes a new a .bashrc and copies
+# the .bash_profile and jupyter_notebook_config.json file into place
+# before running 'jupyter lab'.
+#
+# Working directory is the Project directory,
+# and HOME is the project instance directory
+# (where the bash and bash_profile files are written)
 #
 # As part of the startup we erase the existing '~/.bashrc' and,
 # as a minimum, set a more suitable PS1 (see ch2385).
 # 'conda init' then puts its stuff into the same file.
 notebook_startup = """#!/bin/bash
 echo "PS1='\$(pwd) \$UID$ '" > ~/.bashrc
+echo "umask 0002" >> ~/.bashrc
 conda init
+source ~/.bashrc
 
-source $HOME/.bashrc
-
-if [ ! -f $HOME/.condarc ]; then
-    cat > $HOME/.condarc << EOF
-envs_dirs:
-  - $HOME/.conda/envs
-EOF
+if [ ! -f ~/.bash_profile ]; then
+    echo "Copying bash_profile into place"
+    cp /etc/.bash_profile ~
 fi
 
-if [ -d $HOME/.conda/envs/workspace ]; then
-    echo "Activate virtual environment 'workspace'."
-    conda activate workspace
-fi
-
-mkdir -p $HOME/.jupyter
-if [ ! -f $HOME/.jupyter/jupyter_notebook_config.json ]; then
+if [ ! -f ~/jupyter_notebook_config.json ]; then
     echo "Copying config into place"
-    cp /etc/jupyter_notebook_config.json $HOME/.jupyter
+    cp /etc/jupyter_notebook_config.json ~
+fi
+
+jupyter lab --config=~/jupyter_notebook_config.json
+"""
+
+# The bash-profile
+# which simply launches the .bashrc
+bash_profile = """if [ -f ~/.bashrc ]; then
+    source ~/.bashrc
 fi
 """
 
@@ -81,6 +88,20 @@ def create(name, uid, namespace, spec, logger, **_):
     # ConfigMaps
     # ----------
 
+    bp_cm_body = {
+        "apiVersion": "v1",
+        "kind": "ConfigMap",
+        "metadata": {
+            "name": "bp-%s" % name,
+            "labels": {
+                "app": name
+            }
+        },
+        "data": {
+            ".bash_profile": bash_profile
+        }
+    }
+
     startup_cm_body = {
         "apiVersion": "v1",
         "kind": "ConfigMap",
@@ -91,7 +112,7 @@ def create(name, uid, namespace, spec, logger, **_):
             }
         },
         "data": {
-            "setup-environment.sh": notebook_startup
+            "start.sh": notebook_startup
         }
     }
 
@@ -111,9 +132,11 @@ def create(name, uid, namespace, spec, logger, **_):
         }
     }
 
+    kopf.adopt(bp_cm_body)
     kopf.adopt(startup_cm_body)
     kopf.adopt(config_cm_body)
     core_api = kubernetes.client.CoreV1Api()
+    core_api.create_namespaced_config_map(namespace, bp_cm_body)
     core_api.create_namespaced_config_map(namespace, startup_cm_body)
     core_api.create_namespaced_config_map(namespace, config_cm_body)
 
@@ -154,6 +177,10 @@ def create(name, uid, namespace, spec, logger, **_):
     project_claim_name = material.get("project", {}).get("claimName")
     project_id = material.get("project", {}).get("id")
 
+    # Command is simply our custom start script,
+    # which is mounted at /usr/local/bin
+    command_items = ['bash', '/usr/local/bin/start.sh']
+
     deployment_body = {
         "apiVersion": "apps/v1",
         "kind": "Deployment",
@@ -188,7 +215,8 @@ def create(name, uid, namespace, spec, logger, **_):
                         {
                             "name": "notebook",
                             "image": image,
-                            "imagePullPolicy": "Always",
+                            "command": command_items,
+                            "imagePullPolicy": "IfNotPresent",
                             "resources": {
                                 "requests": {
                                     "memory": "256Mi",
@@ -215,12 +243,17 @@ def create(name, uid, namespace, spec, logger, **_):
                             "volumeMounts": [
                                 {
                                     "name": "startup",
-                                    "mountPath": "/usr/local/bin/before-notebook.d"
+                                    "mountPath": "/usr/local/bin"
                                 },
                                 {
                                     "name": "config",
                                     "mountPath": "/etc/jupyter_notebook_config.json",
                                     "subPath": "jupyter_notebook_config.json"
+                                },
+                                {
+                                    "name": "bp",
+                                    "mountPath": "/etc/.bash_profile",
+                                    "subPath": ".bash_profile"
                                 },
                                 {
                                     "name": "project",
@@ -232,14 +265,20 @@ def create(name, uid, namespace, spec, logger, **_):
                     ],
                     "securityContext": {
                         "runAsUser": sc_run_as_user,
-                        "runAsGroup": 100,
-                        "fsGroup": sc_run_as_group
+                        "runAsGroup": sc_run_as_group,
+                        "fsGroup": 100
                     },
                     "volumes": [
                         {
                             "name": "startup",
                             "configMap": {
                                 "name": "startup-%s" % name
+                            }
+                        },
+                        {
+                            "name": "bp",
+                            "configMap": {
+                                "name": "bp-%s" % name
                             }
                         },
                         {
