@@ -27,7 +27,7 @@ spec:
               - key: informaticsmatters.com/purpose-application
                 operator: Exists
             - matchExpressions:
-              - key: informaticsmatters.com/purpose-core
+              - key: {{ jo_fallback_node_selector_key }}
                 operator: Exists
 
       containers:
