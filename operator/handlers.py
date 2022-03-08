@@ -27,6 +27,12 @@ ingress_tls_secret = os.environ.get('INGRESS_TLS_SECRET')
 # expected if a TLS certificate is not defined.
 ingress_cert_issuer = os.environ.get('INGRESS_CERT_ISSUER')
 
+# Application node selection
+_POD_NODE_SELECTOR_KEY: str = os.environ\
+    .get('JO_POD_NODE_SELECTOR_KEY', 'informaticsmatters.com/purpose-worker')
+_POD_NODE_SELECTOR_VALUE: str = os.environ\
+    .get('JO_POD_NODE_SELECTOR_VALUE', 'yes')
+
 # A custom startup script.
 # This is executed as the container "command"
 # It writes a new a .bashrc and copies
@@ -209,7 +215,7 @@ def create(name, uid, namespace, spec, logger, **_):
                 "spec": {
                     "serviceAccountName": service_account,
                     'nodeSelector': {
-                        'informaticsmatters.com/purpose-worker': 'yes'
+                        _POD_NODE_SELECTOR_KEY: _POD_NODE_SELECTOR_VALUE
                     },
                     "containers": [
                         {

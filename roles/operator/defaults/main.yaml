@@ -32,3 +32,8 @@ jo_ingress_cert_issuer: letsencrypt-nginx-production
 # and is expected to exist.
 jo_dmapi_name: integration
 jo_dmapi_namespace: data-manager-api-{{ jo_dmapi_name }}
+
+# Jupyter node selection.
+# Jupyter will be run on nodes that have labels keys and values defined here...
+jo_pod_node_selector_key: informaticsmatters.com/purpose-worker
+jo_pod_node_selector_value: 'yes'

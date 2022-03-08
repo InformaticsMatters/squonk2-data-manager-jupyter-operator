@@ -39,6 +39,10 @@ spec:
         imagePullPolicy: IfNotPresent
 {% endif %}
         env:
+        - name: JO_POD_NODE_SELECTOR_KEY
+          value: '{{ jo_pod_node_selector_key }}'
+        - name: JO_POD_NODE_SELECTOR_VALUE
+          value: '{{ jo_pod_node_selector_value }}'
         - name: INGRESS_DOMAIN
           value: {{ jo_ingress_domain }}
 {% if jo_ingress_tls_secret %}
