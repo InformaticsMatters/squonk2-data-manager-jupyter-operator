@@ -31,9 +31,9 @@ The operator container, residing in the `operator` directory,
 is automatically built and pushed to Docker Hub using GitHub Actions.
 
 You can build the image yourself using docker-compose.
-The following will build an operator image with the tag `1.0.0-alpha.1`: -
+The following will build an operator image with the tag `19.0.0-alpha.1`: -
 
-    $ export IMAGE_TAG=1.0.0-alpha.1
+    $ export IMAGE_TAG=19.0.0-alpha.1
     $ docker-compose build
 
 ## Deploying into the Data Manager API

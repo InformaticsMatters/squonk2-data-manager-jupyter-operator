@@ -5,12 +5,16 @@
 # You can control some of the behaviour of the build
 # with environment variables: -
 #
-# - IMAGE_TAG The image version tag (default latest)
+# - IMAGE_TAG The image version tag(default 19.0.0)
+#
+# Note: The image tag MUST use the major version of the
+#       kubernetes package the operator is built against.
+#       The minor/patch values are free for your use.
 #
 # i.e.: -
 #
-#   IMAGE_TAG=1.0.0-alpha.1 docker-compose build
-#   IMAGE_TAG=1.0.0-alpha.1 docker-compose push
+#   IMAGE_TAG=19.0.0-alpha.1 docker-compose build
+#   IMAGE_TAG=19.0.0-alpha.1 docker-compose push
 
 version: '3.8'
 
@@ -18,4 +22,4 @@ services:
   operator:
     build:
       context: operator
-    image: informaticsmatters/data-manager-jupyter-operator:${IMAGE_TAG:-latest}
+    image: informaticsmatters/data-manager-jupyter-operator:${IMAGE_TAG:-19.0.0}
