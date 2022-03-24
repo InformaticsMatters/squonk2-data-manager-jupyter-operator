@@ -1,0 +1,10 @@
+---
+
+jo_ingress_domain: squonk.it
+jo_ingress_tls_secret: data-manager-api-tls
+jo_dmapi_name: integration
+jo_image_tag: 19.0.0
+jo_namespaces: data-manager-api-staging:data-manager-api-integration:data-manager-api-production
+
+jo_kubeconfig: "{{ lookup('env', 'KUBECONFIG') }}"
+

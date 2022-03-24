@@ -72,20 +72,13 @@ To remove the operator (assuming there are no operator-derived instances)...
 
 ### Deploying to the official cluster
 The parameters used to deploy the operator to our 'official' cluster
-are held in this repository as Ansible vault files. They can be used and edited
-in-place.
-
-Choose the _integration_, _staging_ or _production_ deployment, then,
-to view or edit: -
-
-    $ export PARAMS=staging
-    $ ansible-vault edit ${PARAMS}-parameters.yaml.vault
-    Vault password: [...]
+are held in this repository.
 
 To deploy: -
 
-    $ ansible-playbook --ask-vault-pass \
-        -e @${PARAMS}-parameters.yaml.vault site.yaml
+    $ export KUBECONFIG=~/k8s-config/config-aws-im-main-eks
+    $ export PARAMS=staging
+    $ ansible-playbook -e @${PARAMS}-parameters.yaml site.yaml
 
 >   You will need the vault password, held in the company's KeePass under
     `data-manager-jupyter-operator -> Ansible Vault Password`
