@@ -10,7 +10,9 @@ import kubernetes
 default_image = 'jupyter/minimal-notebook:notebook-6.3.0'
 default_sa = 'default'
 default_cpu_limit = '1'
+default_cpu_request = '10m'
 default_mem_limit = '1Gi'
+default_mem_request = '256Mi'
 default_user_id = 1000
 default_group_id = 100
 default_ingress_proxy_body_size = '500m'
@@ -91,8 +93,13 @@ def create(name, uid, namespace, spec, logger, **_):
     characters = string.ascii_letters + string.digits
     token = "".join(random.sample(characters, 16))
 
+    logging.info('Starting create (name=%s namespace=%s)...', name, namespace)
+    logging.info('spec=%s (name=%s)', spec, name)
+
     # ConfigMaps
     # ----------
+
+    logging.info('Creating ConfigMaps %s...', name)
 
     bp_cm_body = {
         "apiVersion": "v1",
@@ -151,6 +158,8 @@ def create(name, uid, namespace, spec, logger, **_):
     # Deployment
     # ----------
 
+    logging.info('Creating Deployment %s...', name)
+
     # All Data-Manager provided material
     # will be namespaced under the 'imDataManager' property
     material: Dict[str, any] = spec.get('imDataManager', {})
@@ -162,9 +171,9 @@ def create(name, uid, namespace, spec, logger, **_):
 
     resources = material.get("resources", {})
     cpu_limit = resources.get("limits", {}).get("cpu", default_cpu_limit)
-    cpu_request = resources.get("requests", {}).get("cpu", cpu_limit)
+    cpu_request = resources.get("requests", {}).get("cpu", default_cpu_request)
     memory_limit = resources.get("limits", {}).get("memory", default_mem_limit)
-    memory_request = resources.get("requests", {}).get("memory", memory_limit)
+    memory_request = resources.get("requests", {}).get("memory", default_mem_request)
 
     task_id: str = material.get('taskId')
 
@@ -225,8 +234,8 @@ def create(name, uid, namespace, spec, logger, **_):
                             "imagePullPolicy": "IfNotPresent",
                             "resources": {
                                 "requests": {
-                                    "memory": "256Mi",
-                                    "cpu": "10m"
+                                    "memory": memory_request,
+                                    "cpu": cpu_request
                                 },
                                 "limits": {
                                     "memory": memory_limit,
@@ -327,6 +336,8 @@ def create(name, uid, namespace, spec, logger, **_):
     # Service
     # -------
 
+    logger.debug("Creating Service %s...", name)
+
     service_body = {
         "apiVersion": "v1",
         "kind": "Service",
@@ -359,6 +370,8 @@ def create(name, uid, namespace, spec, logger, **_):
 
     # Ingress
     # -------
+
+    logger.debug("Creating Ingress %s...", name)
 
     ingress_proxy_body_size = material.get("ingressProxyBodySize", default_ingress_proxy_body_size)
 
