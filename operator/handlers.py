@@ -3,6 +3,7 @@ import random
 import string
 from typing import Dict
 
+import logging
 import kopf
 import kubernetes
 
@@ -87,8 +88,18 @@ notebook_config = """{
 """
 
 
+@kopf.on.startup()
+def configure(settings: kopf.OperatorSettings, **_):
+    """The operator startup handler.
+    """
+    # Here we adjust the logging level
+    settings.posting.level = logging.INFO
+
+    logging.info('Startup _POD_PRE_DELETE_DELAY_S=%s', _POD_PRE_DELETE_DELAY_S)
+
+
 @kopf.on.create("squonk.it", "v1alpha3", "jupyternotebooks", id="jupyter")
-def create(name, uid, namespace, spec, logger, **_):
+def create(name, uid, namespace, spec, **_):
 
     characters = string.ascii_letters + string.digits
     token = "".join(random.sample(characters, 16))
@@ -153,7 +164,7 @@ def create(name, uid, namespace, spec, logger, **_):
     core_api.create_namespaced_config_map(namespace, startup_cm_body)
     core_api.create_namespaced_config_map(namespace, config_cm_body)
 
-    logger.debug("Created ConfigMaps")
+    logging.info("Created ConfigMaps")
     
     # Deployment
     # ----------
@@ -331,12 +342,12 @@ def create(name, uid, namespace, spec, logger, **_):
     apps_api = kubernetes.client.AppsV1Api()
     apps_api.create_namespaced_deployment(namespace, deployment_body)
 
-    logger.debug("Created deployment")
+    logging.info("Created deployment")
 
     # Service
     # -------
 
-    logger.debug("Creating Service %s...", name)
+    logging.info("Creating Service %s...", name)
 
     service_body = {
         "apiVersion": "v1",
@@ -366,12 +377,12 @@ def create(name, uid, namespace, spec, logger, **_):
     kopf.adopt(service_body)
     core_api.create_namespaced_service(namespace, service_body)
 
-    logger.debug("Created service")
+    logging.info("Created service")
 
     # Ingress
     # -------
 
-    logger.debug("Creating Ingress %s...", name)
+    logging.info("Creating Ingress %s...", name)
 
     ingress_proxy_body_size = material.get("ingressProxyBodySize", default_ingress_proxy_body_size)
 
@@ -429,7 +440,7 @@ def create(name, uid, namespace, spec, logger, **_):
     ext_api = kubernetes.client.ExtensionsV1beta1Api()
     ext_api.create_namespaced_ingress(namespace, ingress_body)
 
-    logger.debug("Created ingress")
+    logging.info("Created ingress")
 
     # Done
     # ----
@@ -459,5 +470,9 @@ def create(name, uid, namespace, spec, logger, **_):
 
 @kopf.on.delete("squonk.it", "v1alpha3", "jupyternotebooks")
 def delete(body, **kwargs): 
+
+    event_type: str = event['type']
+    logging.info('Handling event_type=%s', event_type)
+
     msg = f"Jupyter notebook {body['metadata']['name']} deleted"
     return {'message': msg}
