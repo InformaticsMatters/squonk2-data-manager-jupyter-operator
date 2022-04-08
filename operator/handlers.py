@@ -95,8 +95,6 @@ def configure(settings: kopf.OperatorSettings, **_):
     # Here we adjust the logging level
     settings.posting.level = logging.INFO
 
-    logging.info('Startup _POD_PRE_DELETE_DELAY_S=%s', _POD_PRE_DELETE_DELAY_S)
-
 
 @kopf.on.create("squonk.it", "v1alpha3", "jupyternotebooks", id="jupyter")
 def create(name, uid, namespace, spec, **_):
