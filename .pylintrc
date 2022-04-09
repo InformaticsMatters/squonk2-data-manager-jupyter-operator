@@ -1,0 +1,13 @@
+[messages control]
+
+# Disable some distracting checks.
+# See http://pylint.pycqa.org/en/latest/user_guide/message-control.html
+#
+# R : (Refactoring) warnings
+disable = consider-using-f-string,
+          line-too-long,
+          missing-class-docstring,
+          missing-function-docstring,
+          missing-module-docstring,
+          R,
+          too-many-lines,
