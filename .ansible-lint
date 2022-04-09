@@ -2,5 +2,6 @@
 
 skip_list:
 - '106'  # Role name {} does not match ``^[a-z][a-z0-9_]+$`` pattern
+- yaml  # Violations reported by yamllint.
 warn_list:
 - fqcn-builtins  # Use FQCN for builtin actions.
