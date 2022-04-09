@@ -317,7 +317,7 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
 
     ingress_body: Dict[Any, Any] = {
         "kind": "Ingress",
-        "apiVersion": "extensions/v1beta1",
+        "apiVersion": "networking.k8s.io/v1",
         "metadata": {
             "name": name,
             "labels": {"app": name},
@@ -335,9 +335,9 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
                         "paths": [
                             {
                                 "path": ingress_path,
+                                "pathType": "Prefix",
                                 "backend": {
-                                    "serviceName": name,
-                                    "servicePort": 8888,
+                                    "service": {"name": name, "port": {"number": 8888}}
                                 },
                             }
                         ]
