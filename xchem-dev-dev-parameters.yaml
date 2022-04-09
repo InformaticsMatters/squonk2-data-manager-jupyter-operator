@@ -1,6 +1,6 @@
 ---
 
-jo_ingress_domain: squonk.it
+jo_ingress_domain: data-manager.xchem-dev.diamond.ac.uk
 jo_ingress_tls_secret: data-manager-api-tls
 jo_dmapi_name: dev
 jo_image_tag: 19.1.2
