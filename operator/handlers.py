@@ -95,7 +95,7 @@ def configure(settings: kopf.OperatorSettings, **_: Any) -> None:
     settings.posting.level = logging.INFO
 
 
-@kopf.on.create("squonk.it", "v1", "jupyternotebooks", id="jupyter")
+@kopf.on.create("squonk.it", "v1alpha3", "jupyternotebooks", id="jupyter")
 def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[str, Any]:
 
     characters = string.ascii_letters + string.digits
