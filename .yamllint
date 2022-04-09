@@ -7,6 +7,7 @@ yaml-files:
 
 ignore: |
   .github/
+  venv/
   roles/operator/templates/deployment.yaml.j2
 
 rules:
@@ -27,7 +28,7 @@ rules:
   hyphens:
     max-spaces-after: 1
   empty-lines:
-    max: 1
+    max: 2
   document-start:
     present: yes
   document-end:
