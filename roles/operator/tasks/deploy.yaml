@@ -8,7 +8,7 @@
     name: "{{ jo_dmapi_namespace }}"
   register: ns_result
 
-- name: Assert Namespace
+- name: Assert Namespace ({{ jo_dmapi_namespace }})
   assert:
     that:
     - ns_result.resources|length == 1
