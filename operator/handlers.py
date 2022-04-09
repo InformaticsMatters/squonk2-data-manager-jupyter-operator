@@ -354,7 +354,7 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
         annotations["cert-manager.io/cluster-issuer"] = ingress_cert_issuer
 
     kopf.adopt(ingress_body)
-    ext_api = kubernetes.client.ExtensionsV1beta1Api()
+    ext_api = kubernetes.client.NetworkingV1Api()
     ext_api.create_namespaced_ingress(namespace, ingress_body)
 
     logging.info("Created ingress")
