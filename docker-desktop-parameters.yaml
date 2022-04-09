@@ -1,0 +1,9 @@
+---
+
+jo_ingress_domain: kubernetes.docker.internal
+jo_ingress_tls_secret: data-manager-api-tls
+jo_dmapi_namespace: data-manager-api
+jo_image_tag: 19.1.0
+jo_namespaces: data-manager-api
+
+jo_kubeconfig: "{{ lookup('env', 'KUBECONFIG') }}"
