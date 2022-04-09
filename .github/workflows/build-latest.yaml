@@ -42,8 +42,7 @@ jobs:
         ansible-galaxy install -r requirements.yaml
     - name: Lint
       run: |
-        yamllint .
-        find . -type f -name '*.yaml.j2' -exec yamllint {} +
+        pre-commit run --all-files
         ansible-lint
     - name: Login to DockerHub
       uses: docker/login-action@v1
