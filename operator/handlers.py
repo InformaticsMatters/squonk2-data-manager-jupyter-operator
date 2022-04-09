@@ -1,40 +1,40 @@
-import os
-import random
-import string
-from typing import Dict
-
 import logging
-import kopf
+import random
+import os
+import string
+from typing import Any, Dict
+
 import kubernetes
+import kopf
 
 # Some (key) default deployment variables...
-default_image = 'jupyter/minimal-notebook:notebook-6.3.0'
-default_sa = 'default'
-default_cpu_limit = '1'
-default_cpu_request = '10m'
-default_mem_limit = '1Gi'
-default_mem_request = '256Mi'
+default_image = "jupyter/minimal-notebook:notebook-6.3.0"
+default_sa = "default"
+default_cpu_limit = "1"
+default_cpu_request = "10m"
+default_mem_limit = "1Gi"
+default_mem_request = "256Mi"
 default_user_id = 1000
 default_group_id = 100
-default_ingress_proxy_body_size = '500m'
+default_ingress_proxy_body_size = "500m"
 
 # The ingress class
-ingress_class = 'nginx'
+ingress_class = "nginx"
 # The ingress domain must be provided.
-ingress_domain = os.environ['INGRESS_DOMAIN']
+ingress_domain = os.environ["INGRESS_DOMAIN"]
 # The ingress TLS secret is optional.
 # If provided it is used as the Ingress secret
 # and cert-manager is avoided.
-ingress_tls_secret = os.environ.get('INGRESS_TLS_SECRET')
+ingress_tls_secret = os.environ.get("INGRESS_TLS_SECRET")
 # The cert-manager issuer,
 # expected if a TLS certificate is not defined.
-ingress_cert_issuer = os.environ.get('INGRESS_CERT_ISSUER')
+ingress_cert_issuer = os.environ.get("INGRESS_CERT_ISSUER")
 
 # Application node selection
-_POD_NODE_SELECTOR_KEY: str = os.environ\
-    .get('JO_POD_NODE_SELECTOR_KEY', 'informaticsmatters.com/purpose-worker')
-_POD_NODE_SELECTOR_VALUE: str = os.environ\
-    .get('JO_POD_NODE_SELECTOR_VALUE', 'yes')
+_POD_NODE_SELECTOR_KEY: str = os.environ.get(
+    "JO_POD_NODE_SELECTOR_KEY", "informaticsmatters.com/purpose-worker"
+)
+_POD_NODE_SELECTOR_VALUE: str = os.environ.get("JO_POD_NODE_SELECTOR_VALUE", "yes")
 
 # A custom startup script.
 # This is executed as the container "command"
@@ -89,69 +89,46 @@ notebook_config = """{
 
 
 @kopf.on.startup()
-def configure(settings: kopf.OperatorSettings, **_):
-    """The operator startup handler.
-    """
+def configure(settings: kopf.OperatorSettings, **_: Any) -> None:
+    """The operator startup handler."""
     # Here we adjust the logging level
     settings.posting.level = logging.INFO
 
 
 @kopf.on.create("squonk.it", "v1alpha3", "jupyternotebooks", id="jupyter")
-def create(name, uid, namespace, spec, **_):
+def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[str, Any]:
 
     characters = string.ascii_letters + string.digits
     token = "".join(random.sample(characters, 16))
 
-    logging.info('Starting create (name=%s namespace=%s)...', name, namespace)
-    logging.info('spec=%s (name=%s)', spec, name)
+    logging.info("Starting create (name=%s namespace=%s)...", name, namespace)
+    logging.info("spec=%s (name=%s)", spec, name)
 
     # ConfigMaps
     # ----------
 
-    logging.info('Creating ConfigMaps %s...', name)
+    logging.info("Creating ConfigMaps %s...", name)
 
     bp_cm_body = {
         "apiVersion": "v1",
         "kind": "ConfigMap",
-        "metadata": {
-            "name": "bp-%s" % name,
-            "labels": {
-                "app": name
-            }
-        },
-        "data": {
-            ".bash_profile": bash_profile
-        }
+        "metadata": {"name": "bp-%s" % name, "labels": {"app": name}},
+        "data": {".bash_profile": bash_profile},
     }
 
     startup_cm_body = {
         "apiVersion": "v1",
         "kind": "ConfigMap",
-        "metadata": {
-            "name": "startup-%s" % name,
-            "labels": {
-                "app": name
-            }
-        },
-        "data": {
-            "start.sh": notebook_startup
-        }
+        "metadata": {"name": "startup-%s" % name, "labels": {"app": name}},
+        "data": {"start.sh": notebook_startup},
     }
 
-    config_vars = {'token': token,
-                   'base_url': name}
+    config_vars = {"token": token, "base_url": name}
     config_cm_body = {
         "apiVersion": "v1",
         "kind": "ConfigMap",
-        "metadata": {
-            "name": "config-%s" % name,
-            "labels": {
-                "app": name
-            }
-        },
-        "data": {
-            "jupyter_notebook_config.json": notebook_config % config_vars
-        }
+        "metadata": {"name": "config-%s" % name, "labels": {"app": name}},
+        "data": {"jupyter_notebook_config.json": notebook_config % config_vars},
     }
 
     kopf.adopt(bp_cm_body)
@@ -163,15 +140,15 @@ def create(name, uid, namespace, spec, **_):
     core_api.create_namespaced_config_map(namespace, config_cm_body)
 
     logging.info("Created ConfigMaps")
-    
+
     # Deployment
     # ----------
 
-    logging.info('Creating Deployment %s...', name)
+    logging.info("Creating Deployment %s...", name)
 
     # All Data-Manager provided material
     # will be namespaced under the 'imDataManager' property
-    material: Dict[str, any] = spec.get('imDataManager', {})
+    material: Dict[str, Any] = spec.get("imDataManager", {})
 
     notebook_interface = material.get("notebook", {}).get("interface", "lab")
 
@@ -184,8 +161,6 @@ def create(name, uid, namespace, spec, **_):
     memory_limit = resources.get("limits", {}).get("memory", default_mem_limit)
     memory_request = resources.get("requests", {}).get("memory", default_mem_request)
 
-    task_id: str = material.get('taskId')
-
     # Data Manager API compliance.
     #
     # The user and group IDs we're asked to run as.
@@ -194,8 +169,12 @@ def create(name, uid, namespace, spec, **_):
     # We use the supplied group ID and pass that into the container
     # as the Kubernetes 'File System Group' (fsGroup).
     # This should allow us to run and manipulate the files.
-    sc_run_as_user = material.get("securityContext", {}).get("runAsUser", default_user_id)
-    sc_run_as_group = material.get("securityContext", {}).get("runAsGroup", default_group_id)
+    sc_run_as_user = material.get("securityContext", {}).get(
+        "runAsUser", default_user_id
+    )
+    sc_run_as_group = material.get("securityContext", {}).get(
+        "runAsGroup", default_group_id
+    )
 
     # Project storage
     project_claim_name = material.get("project", {}).get("claimName")
@@ -203,38 +182,21 @@ def create(name, uid, namespace, spec, **_):
 
     # Command is simply our custom start script,
     # which is mounted at /usr/local/bin
-    command_items = ['bash', '/usr/local/bin/start.sh']
+    command_items = ["bash", "/usr/local/bin/start.sh"]
 
-    deployment_body = {
+    deployment_body: Dict[Any, Any] = {
         "apiVersion": "apps/v1",
         "kind": "Deployment",
-        "metadata": {
-            "name": name,
-            "labels": {
-                "app": name
-            }
-        },
+        "metadata": {"name": name, "labels": {"app": name}},
         "spec": {
             "replicas": 1,
-            "selector": {
-                "matchLabels": {
-                    "deployment": name
-                }
-            },
-            "strategy": {
-                "type": "Recreate"
-            },
+            "selector": {"matchLabels": {"deployment": name}},
+            "strategy": {"type": "Recreate"},
             "template": {
-                "metadata": {
-                    "labels": {
-                        "deployment": name
-                    }
-                },
+                "metadata": {"labels": {"deployment": name}},
                 "spec": {
                     "serviceAccountName": service_account,
-                    'nodeSelector': {
-                        _POD_NODE_SELECTOR_KEY: _POD_NODE_SELECTOR_VALUE
-                    },
+                    "nodeSelector": {_POD_NODE_SELECTOR_KEY: _POD_NODE_SELECTOR_VALUE},
                     "containers": [
                         {
                             "name": "notebook",
@@ -244,12 +206,9 @@ def create(name, uid, namespace, spec, **_):
                             "resources": {
                                 "requests": {
                                     "memory": memory_request,
-                                    "cpu": cpu_request
+                                    "cpu": cpu_request,
                                 },
-                                "limits": {
-                                    "memory": memory_limit,
-                                    "cpu": cpu_limit
-                                }
+                                "limits": {"memory": memory_limit, "cpu": cpu_limit},
                             },
                             "ports": [
                                 {
@@ -258,66 +217,41 @@ def create(name, uid, namespace, spec, **_):
                                     "protocol": "TCP",
                                 }
                             ],
-                            "env": [
-                                {
-                                    "name": "HOME",
-                                    "value": "/home/jovyan/." + name
-                                }
-                            ],
+                            "env": [{"name": "HOME", "value": "/home/jovyan/." + name}],
                             "volumeMounts": [
-                                {
-                                    "name": "startup",
-                                    "mountPath": "/usr/local/bin"
-                                },
+                                {"name": "startup", "mountPath": "/usr/local/bin"},
                                 {
                                     "name": "config",
                                     "mountPath": "/etc/jupyter_notebook_config.json",
-                                    "subPath": "jupyter_notebook_config.json"
+                                    "subPath": "jupyter_notebook_config.json",
                                 },
                                 {
                                     "name": "bp",
                                     "mountPath": "/etc/.bash_profile",
-                                    "subPath": ".bash_profile"
+                                    "subPath": ".bash_profile",
                                 },
                                 {
                                     "name": "project",
                                     "mountPath": "/home/jovyan",
-                                    "subPath": project_id
-                                }
-                            ]
+                                    "subPath": project_id,
+                                },
+                            ],
                         }
                     ],
                     "securityContext": {
                         "runAsUser": sc_run_as_user,
                         "runAsGroup": sc_run_as_group,
-                        "fsGroup": 100
+                        "fsGroup": 100,
                     },
                     "volumes": [
-                        {
-                            "name": "startup",
-                            "configMap": {
-                                "name": "startup-%s" % name
-                            }
-                        },
-                        {
-                            "name": "bp",
-                            "configMap": {
-                                "name": "bp-%s" % name
-                            }
-                        },
-                        {
-                            "name": "config",
-                            "configMap": {
-                                "name": "config-%s" % name
-                            }
-                        },
+                        {"name": "startup", "configMap": {"name": "startup-%s" % name}},
+                        {"name": "bp", "configMap": {"name": "bp-%s" % name}},
+                        {"name": "config", "configMap": {"name": "config-%s" % name}},
                         {
                             "name": "project",
-                            "persistentVolumeClaim": {
-                                "claimName": project_claim_name
-                            }
-                        }
-                    ]
+                            "persistentVolumeClaim": {"claimName": project_claim_name},
+                        },
+                    ],
                 },
             },
         },
@@ -333,8 +267,7 @@ def create(name, uid, namespace, spec, **_):
     c_env = deployment_body["spec"]["template"]["spec"]["containers"][0]["env"]
 
     if notebook_interface != "classic":
-        c_env.append({"name": "JUPYTER_ENABLE_LAB",
-                      "value": "true"})
+        c_env.append({"name": "JUPYTER_ENABLE_LAB", "value": "true"})
 
     kopf.adopt(deployment_body)
     apps_api = kubernetes.client.AppsV1Api()
@@ -350,12 +283,7 @@ def create(name, uid, namespace, spec, **_):
     service_body = {
         "apiVersion": "v1",
         "kind": "Service",
-        "metadata": {
-            "name": name,
-            "labels": {
-                "app": name
-            }
-        },
+        "metadata": {"name": name, "labels": {"app": name}},
         "spec": {
             "type": "ClusterIP",
             "ports": [
@@ -366,9 +294,7 @@ def create(name, uid, namespace, spec, **_):
                     "targetPort": 8888,
                 }
             ],
-            "selector": {
-                "deployment": name
-            },
+            "selector": {"deployment": name},
         },
     }
 
@@ -382,33 +308,26 @@ def create(name, uid, namespace, spec, **_):
 
     logging.info("Creating Ingress %s...", name)
 
-    ingress_proxy_body_size = material.get("ingressProxyBodySize", default_ingress_proxy_body_size)
+    ingress_proxy_body_size = material.get(
+        "ingressProxyBodySize", default_ingress_proxy_body_size
+    )
 
     ingress_path = f"/{name}"
     tls_secret = ingress_tls_secret if ingress_tls_secret else f"{name}-tls"
 
-    ingress_body = {
+    ingress_body: Dict[Any, Any] = {
         "kind": "Ingress",
         "apiVersion": "extensions/v1beta1",
         "metadata": {
             "name": name,
-            "labels": {
-                "app": name
-            },
+            "labels": {"app": name},
             "annotations": {
                 "kubernetes.io/ingress.class": ingress_class,
-                "nginx.ingress.kubernetes.io/proxy-body-size": f"{ingress_proxy_body_size}"
-            }
+                "nginx.ingress.kubernetes.io/proxy-body-size": f"{ingress_proxy_body_size}",
+            },
         },
         "spec": {
-            "tls": [
-                {
-                    "hosts": [
-                        ingress_domain
-                    ],
-                    "secretName": tls_secret
-                }
-            ],
+            "tls": [{"hosts": [ingress_domain], "secretName": tls_secret}],
             "rules": [
                 {
                     "host": ingress_domain,
@@ -422,16 +341,16 @@ def create(name, uid, namespace, spec, **_):
                                 },
                             }
                         ]
-                    }
+                    },
                 }
-            ]
-        }
+            ],
+        },
     }
 
     # Inject the cert-manager annotation if a TLS secret is not defined
     # and a cert issuer is...
     if not ingress_tls_secret and ingress_cert_issuer:
-        annotations = ingress_body['metadata']['annotations']
+        annotations = ingress_body["metadata"]["annotations"]
         annotations["cert-manager.io/cluster-issuer"] = ingress_cert_issuer
 
     kopf.adopt(ingress_body)
@@ -452,25 +371,8 @@ def create(name, uid, namespace, spec, **_):
         "image": image,
         "serviceAccountName": service_account,
         "resources": {
-            "requests": {
-                "memory": memory_request
-            },
-            "limits": {
-                "memory": memory_limit
-            }
+            "requests": {"memory": memory_request},
+            "limits": {"memory": memory_limit},
         },
-        "project": {
-            "claimName": project_claim_name,
-            "id": project_id
-        }
+        "project": {"claimName": project_claim_name, "id": project_id},
     }
-
-
-@kopf.on.delete("squonk.it", "v1alpha3", "jupyternotebooks")
-def delete(body, **kwargs): 
-
-    event_type: str = event['type']
-    logging.info('Handling event_type=%s', event_type)
-
-    msg = f"Jupyter notebook {body['metadata']['name']} deleted"
-    return {'message': msg}
