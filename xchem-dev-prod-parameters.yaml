@@ -1,0 +1,12 @@
+---
+
+jo_ingress_domain: data-manager.xchem.diamond.ac.uk
+jo_ingress_tls_secret: data-manager-api-tls
+jo_dmapi_name: production
+jo_image_tag: 19.1.2
+jo_namespaces: data-manager-api-production
+jo_pod_node_selector_key: purpose
+jo_pod_node_selector_value: application
+jo_fallback_node_selector_key: node-role.kubernetes.io/worker
+
+jo_kubeconfig: "{{ lookup('env', 'KUBECONFIG') }}"
