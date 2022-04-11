@@ -122,14 +122,14 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
     bp_cm_body = {
         "apiVersion": "v1",
         "kind": "ConfigMap",
-        "metadata": {"name": "bp-%s" % name, "labels": {"app": name}},
+        "metadata": {"name": f"bp-{name}", "labels": {"app": name}},
         "data": {".bash_profile": _BASH_PROFILE},
     }
 
     startup_cm_body = {
         "apiVersion": "v1",
         "kind": "ConfigMap",
-        "metadata": {"name": "startup-%s" % name, "labels": {"app": name}},
+        "metadata": {"name": f"startup-{name}", "labels": {"app": name}},
         "data": {"start.sh": _NOTEBOOK_STARTUP},
     }
 
@@ -137,7 +137,7 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
     config_cm_body = {
         "apiVersion": "v1",
         "kind": "ConfigMap",
-        "metadata": {"name": "config-%s" % name, "labels": {"app": name}},
+        "metadata": {"name": f"config-{name}", "labels": {"app": name}},
         "data": {"jupyter_notebook_config.json": _NOTEBOOK_CONFIG % config_vars},
     }
 
@@ -254,9 +254,9 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
                         "fsGroup": 100,
                     },
                     "volumes": [
-                        {"name": "startup", "configMap": {"name": "startup-%s" % name}},
-                        {"name": "bp", "configMap": {"name": "bp-%s" % name}},
-                        {"name": "config", "configMap": {"name": "config-%s" % name}},
+                        {"name": "startup", "configMap": {"name": f"startup-{name}"}},
+                        {"name": "bp", "configMap": {"name": f"bp-{name}"}},
+                        {"name": "config", "configMap": {"name": f"config-{name}"}},
                         {
                             "name": "project",
                             "persistentVolumeClaim": {"claimName": project_claim_name},
