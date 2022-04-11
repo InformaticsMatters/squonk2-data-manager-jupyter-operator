@@ -1,3 +1,5 @@
+"""A kopf handler for the Jupyter CRD.
+"""
 import logging
 import random
 import os
@@ -8,18 +10,18 @@ import kubernetes
 import kopf
 
 # Some (key) default deployment variables...
-default_image = "jupyter/minimal-notebook:notebook-6.3.0"
-default_sa = "default"
-default_cpu_limit = "1"
-default_cpu_request = "10m"
-default_mem_limit = "1Gi"
-default_mem_request = "256Mi"
-default_user_id = 1000
-default_group_id = 100
-default_ingress_proxy_body_size = "500m"
+_DEFAULT_IMAGE = "jupyter/minimal-notebook:notebook-6.3.0"
+_DEFAULT_SA = "default"
+_DEFAULT_CPU_LIMIT = "1"
+_DEFAULT_CPU_REQUEST = "10m"
+_DEFAULT_MEM_LIMIT = "1Gi"
+_DEFAULT_MEM_REQUEST = "256Mi"
+_DEFAULT_USER_ID = 1000
+_DEFAULT_GROUP_ID = 100
+_DEFAULT_INGRESS_PROXY_BODY_SIZE = "500m"
 
 # The ingress class
-ingress_class = "nginx"
+_INGRESS_CLASS = "nginx"
 # The ingress domain must be provided.
 ingress_domain = os.environ["INGRESS_DOMAIN"]
 # The ingress TLS secret is optional.
@@ -49,7 +51,7 @@ _POD_NODE_SELECTOR_VALUE: str = os.environ.get("JO_POD_NODE_SELECTOR_VALUE", "ye
 # As part of the startup we erase the existing '~/.bashrc' and,
 # as a minimum, set a more suitable PS1 (see ch2385).
 # 'conda init' then puts its stuff into the same file.
-notebook_startup = """#!/bin/bash
+_NOTEBOOK_STARTUP = """#!/bin/bash
 echo "PS1='\$(pwd) \$UID$ '" > ~/.bashrc
 echo "umask 0002" >> ~/.bashrc
 conda init
@@ -70,7 +72,7 @@ jupyter lab --config=~/jupyter_notebook_config.json
 
 # The bash-profile
 # which simply launches the .bashrc
-bash_profile = """if [ -f ~/.bashrc ]; then
+_BASH_PROFILE = """if [ -f ~/.bashrc ]; then
     source ~/.bashrc
 fi
 """
@@ -79,7 +81,7 @@ fi
 # A ConfigMap whose content is written into '/etc'
 # and copied to the $HOME/.jupyter by the notebook_startup
 # script (above).
-notebook_config = """{
+_NOTEBOOK_CONFIG = """{
   "NotebookApp": {
     "token": "%(token)s",
     "base_url": "%(base_url)s"
@@ -97,6 +99,14 @@ def configure(settings: kopf.OperatorSettings, **_: Any) -> None:
 
 @kopf.on.create("squonk.it", "v1", "jupyternotebooks", id="jupyter")
 def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[str, Any]:
+    """Handler for CRD create events.
+    Here we construct the required Kubernetes objects,
+    adopting them in kopf before using the corresponding Kubernetes API
+    to create them.
+
+    We handle errors typically raising 'kopf.PermanentError' to prevent
+    Kubernetes constantly calling back for a given create.
+    """
 
     characters = string.ascii_letters + string.digits
     token = "".join(random.sample(characters, 16))
@@ -113,14 +123,14 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
         "apiVersion": "v1",
         "kind": "ConfigMap",
         "metadata": {"name": "bp-%s" % name, "labels": {"app": name}},
-        "data": {".bash_profile": bash_profile},
+        "data": {".bash_profile": _BASH_PROFILE},
     }
 
     startup_cm_body = {
         "apiVersion": "v1",
         "kind": "ConfigMap",
         "metadata": {"name": "startup-%s" % name, "labels": {"app": name}},
-        "data": {"start.sh": notebook_startup},
+        "data": {"start.sh": _NOTEBOOK_STARTUP},
     }
 
     config_vars = {"token": token, "base_url": name}
@@ -128,7 +138,7 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
         "apiVersion": "v1",
         "kind": "ConfigMap",
         "metadata": {"name": "config-%s" % name, "labels": {"app": name}},
-        "data": {"jupyter_notebook_config.json": notebook_config % config_vars},
+        "data": {"jupyter_notebook_config.json": _NOTEBOOK_CONFIG % config_vars},
     }
 
     kopf.adopt(bp_cm_body)
@@ -152,14 +162,14 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
 
     notebook_interface = material.get("notebook", {}).get("interface", "lab")
 
-    image = material.get("image", default_image)
-    service_account = material.get("serviceAccountName", default_sa)
+    image = material.get("image", _DEFAULT_IMAGE)
+    service_account = material.get("serviceAccountName", _DEFAULT_SA)
 
     resources = material.get("resources", {})
-    cpu_limit = resources.get("limits", {}).get("cpu", default_cpu_limit)
-    cpu_request = resources.get("requests", {}).get("cpu", default_cpu_request)
-    memory_limit = resources.get("limits", {}).get("memory", default_mem_limit)
-    memory_request = resources.get("requests", {}).get("memory", default_mem_request)
+    cpu_limit = resources.get("limits", {}).get("cpu", _DEFAULT_CPU_LIMIT)
+    cpu_request = resources.get("requests", {}).get("cpu", _DEFAULT_CPU_REQUEST)
+    memory_limit = resources.get("limits", {}).get("memory", _DEFAULT_MEM_LIMIT)
+    memory_request = resources.get("requests", {}).get("memory", _DEFAULT_MEM_REQUEST)
 
     # Data Manager API compliance.
     #
@@ -170,10 +180,10 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
     # as the Kubernetes 'File System Group' (fsGroup).
     # This should allow us to run and manipulate the files.
     sc_run_as_user = material.get("securityContext", {}).get(
-        "runAsUser", default_user_id
+        "runAsUser", _DEFAULT_USER_ID
     )
     sc_run_as_group = material.get("securityContext", {}).get(
-        "runAsGroup", default_group_id
+        "runAsGroup", _DEFAULT_GROUP_ID
     )
 
     # Project storage
@@ -309,7 +319,7 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
     logging.info("Creating Ingress %s...", name)
 
     ingress_proxy_body_size = material.get(
-        "ingressProxyBodySize", default_ingress_proxy_body_size
+        "ingressProxyBodySize", _DEFAULT_INGRESS_PROXY_BODY_SIZE
     )
 
     ingress_path = f"/{name}"
@@ -322,7 +332,7 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
             "name": name,
             "labels": {"app": name},
             "annotations": {
-                "kubernetes.io/ingress.class": ingress_class,
+                "kubernetes.io/ingress.class": _INGRESS_CLASS,
                 "nginx.ingress.kubernetes.io/proxy-body-size": f"{ingress_proxy_body_size}",
             },
         },

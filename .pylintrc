@@ -2,12 +2,10 @@
 
 # Disable some distracting checks.
 # See http://pylint.pycqa.org/en/latest/user_guide/message-control.html
-#
-# R : (Refactoring) warnings
-disable = consider-using-f-string,
-          line-too-long,
-          missing-class-docstring,
-          missing-function-docstring,
-          missing-module-docstring,
-          R,
-          too-many-lines,
+# For now ... disable
+# all C (convention) warnings
+# all R (Refactoring) warnings
+# along with any specific (distracting) errors/warnings.
+# See http://pylint.pycqa.org/en/latest/user_guide/message-control.html
+disable = C0103, R, E0401, E1101, E1136,
+          anomalous-backslash-in-string
