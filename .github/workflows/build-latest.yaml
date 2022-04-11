@@ -43,6 +43,7 @@ jobs:
     - name: Lint
       run: |
         pre-commit run --all-files
+        pylint operator/*.py
         ansible-lint
     - name: Login to DockerHub
       uses: docker/login-action@v1

@@ -45,6 +45,7 @@ jobs:
     - name: Lint
       run: |
         pre-commit run --all-files
+        pylint operator/*.py
         ansible-lint
     - name: Build
       uses: docker/build-push-action@v2
