@@ -35,7 +35,7 @@ The project uses: -
 
 - [pre-commit] to enforce linting of files prior to committing them to the
   upstream repository
-- [Commitizen] to enforce a [Convention Commit] commit message format
+- [Commitizen] to enforce a [Conventional Commit] commit message format
 - [Black] as a code formatter
 
 You **MUST** comply with these choices in order to  contribute to the project.
