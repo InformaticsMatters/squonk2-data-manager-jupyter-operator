@@ -20,7 +20,7 @@ commitizen:
     # The changelog_pattern identifies the commit types
     # that will be included.
     # Build the changelog with 'cz ch' on the staging or production branches.
-    changelog_pattern: "^(feat|fix|perf|refactor|style|test|build|docs|ci)?"
+    changelog_pattern: "^(feat|fix|perf|refactor|remove|style|test|build|docs|ci)?"
     # A mapping of type to its group name in the changelog.
     # We call 'feat' commits 'New Features'
     change_type_map:
