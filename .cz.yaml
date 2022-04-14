@@ -15,8 +15,8 @@ commitizen:
   # and didn't have everything ready for change-logs.
   changelog_start_rev: 19.1.0
   customize:
-    schema_pattern: "^(?P<change_type>feat|fix|perf|refactor|style|test|build|docs|ci|BREAKING CHANGE)(?:\\((?P<scope>[^()\\r\\n]*)\\)|\\()?(?P<breaking>!)?:\\s(?P<message>.*)?"
-    commit_parser: "^(?P<change_type>feat|fix|perf|refactor|style|test|build|docs|ci|BREAKING CHANGE)(?:\\((?P<scope>[^()\\r\\n]*)\\)|\\()?(?P<breaking>!)?:\\s(?P<message>.*)?"
+    schema_pattern: "^(?P<change_type>feat|fix|perf|refactor|remove|style|test|build|docs|ci|BREAKING CHANGE)(?:\\((?P<scope>[^()\\r\\n]*)\\)|\\()?(?P<breaking>!)?:\\s(?P<message>.*)?"
+    commit_parser: "^(?P<change_type>feat|fix|perf|refactor|remove|style|test|build|docs|ci|BREAKING CHANGE)(?:\\((?P<scope>[^()\\r\\n]*)\\)|\\()?(?P<breaking>!)?:\\s(?P<message>.*)?"
     # The changelog_pattern identifies the commit types
     # that will be included.
     # Build the changelog with 'cz ch' on the staging or production branches.
@@ -30,6 +30,7 @@ commitizen:
       fix: Bug Fixes
       perf: Performance Improvements
       refactor: Refactoring
+      remove: Removed
       style: Stylistic Changes
       ci: CI/CD
       test: Testing
@@ -39,6 +40,7 @@ commitizen:
     - "fix"
     - "perf"
     - "refactor"
+    - "remove"
     - "style"
     - "test"
     - "build"
