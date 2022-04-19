@@ -5,5 +5,6 @@ RUN pip install -r requirements.txt
 
 WORKDIR /src
 COPY handlers.py /src/
+COPY entrypoint.sh /src/
 
-CMD kopf run ./handlers.py --verbose --log-format full
+CMD ./entrypoint.sh
