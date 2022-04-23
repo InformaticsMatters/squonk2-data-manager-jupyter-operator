@@ -1,4 +1,7 @@
-# A Jupyter Operator (for the Data Manager API)
+# A Jupyter Application Operator (for the Data Manager API)
+
+[![Data Manager: Application](https://img.shields.io/badge/data%20manager-application-000000?labelColor=dc332e)]()
+[![Dev Stage: 1](https://img.shields.io/badge/dev%20stage-★☆☆%20%281%29-000000?labelColor=dc332e)](https://github.com/InformaticsMatters/code-repository-development-stages)
 
 [![build](https://github.com/informaticsmatters/data-manager-jupyter-operator/actions/workflows/build.yaml/badge.svg)](https://github.com/informaticsmatters/data-manager-jupyter-operator/actions/workflows/build.yaml)
 [![build latest](https://github.com/informaticsmatters/data-manager-jupyter-operator/actions/workflows/build-latest.yaml/badge.svg)](https://github.com/informaticsmatters/data-manager-jupyter-operator/actions/workflows/build-latest.yaml)
