@@ -4,33 +4,33 @@ import logging
 import random
 import os
 import string
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import kubernetes
 import kopf
 
 # Some (key) default deployment variables...
-_DEFAULT_IMAGE = "jupyter/minimal-notebook:notebook-6.3.0"
-_DEFAULT_SA = "default"
-_DEFAULT_CPU_LIMIT = "1"
-_DEFAULT_CPU_REQUEST = "10m"
-_DEFAULT_MEM_LIMIT = "1Gi"
-_DEFAULT_MEM_REQUEST = "256Mi"
-_DEFAULT_USER_ID = 1000
-_DEFAULT_GROUP_ID = 100
-_DEFAULT_INGRESS_PROXY_BODY_SIZE = "500m"
+_DEFAULT_IMAGE: str = "jupyter/minimal-notebook:notebook-6.3.0"
+_DEFAULT_SA: str = "default"
+_DEFAULT_CPU_LIMIT: str = "1"
+_DEFAULT_CPU_REQUEST: str = "10m"
+_DEFAULT_MEM_LIMIT: str = "1Gi"
+_DEFAULT_MEM_REQUEST: str = "256Mi"
+_DEFAULT_USER_ID: int = 1000
+_DEFAULT_GROUP_ID: int = 100
+_DEFAULT_INGRESS_PROXY_BODY_SIZE: str = "500m"
 
 # The ingress class
-_INGRESS_CLASS = "nginx"
+_INGRESS_CLASS: str = "nginx"
 # The ingress domain must be provided.
-ingress_domain = os.environ["INGRESS_DOMAIN"]
+ingress_domain: str = os.environ["INGRESS_DOMAIN"]
 # The ingress TLS secret is optional.
 # If provided it is used as the Ingress secret
 # and cert-manager is avoided.
-ingress_tls_secret = os.environ.get("INGRESS_TLS_SECRET")
+ingress_tls_secret: Optional[str] = os.environ.get("INGRESS_TLS_SECRET")
 # The cert-manager issuer,
 # expected if a TLS certificate is not defined.
-ingress_cert_issuer = os.environ.get("INGRESS_CERT_ISSUER")
+ingress_cert_issuer: Optional[str] = os.environ.get("INGRESS_CERT_ISSUER")
 
 # Application node selection
 _POD_NODE_SELECTOR_KEY: str = os.environ.get(
@@ -51,7 +51,7 @@ _POD_NODE_SELECTOR_VALUE: str = os.environ.get("JO_POD_NODE_SELECTOR_VALUE", "ye
 # As part of the startup we erase the existing '~/.bashrc' and,
 # as a minimum, set a more suitable PS1 (see ch2385).
 # 'conda init' then puts its stuff into the same file.
-_NOTEBOOK_STARTUP = """#!/bin/bash
+_NOTEBOOK_STARTUP: str = """#!/bin/bash
 echo "PS1='\$(pwd) \$UID$ '" > ~/.bashrc
 echo "umask 0002" >> ~/.bashrc
 conda init
@@ -72,7 +72,7 @@ jupyter lab --config=~/jupyter_notebook_config.json
 
 # The bash-profile
 # which simply launches the .bashrc
-_BASH_PROFILE = """if [ -f ~/.bashrc ]; then
+_BASH_PROFILE: str = """if [ -f ~/.bashrc ]; then
     source ~/.bashrc
 fi
 """
@@ -81,7 +81,7 @@ fi
 # A ConfigMap whose content is written into '/etc'
 # and copied to the $HOME/.jupyter by the notebook_startup
 # script (above).
-_NOTEBOOK_CONFIG = """{
+_NOTEBOOK_CONFIG: str = """{
   "NotebookApp": {
     "token": "%(token)s",
     "base_url": "%(base_url)s"
@@ -97,7 +97,7 @@ def configure(settings: kopf.OperatorSettings, **_: Any) -> None:
     settings.posting.level = logging.INFO
 
 
-@kopf.on.create("squonk.it", "v1", "jupyternotebooks", id="jupyter")
+@kopf.on.create("squonk.it", "v2", "jupyternotebooks", id="jupyter")
 def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[str, Any]:
     """Handler for CRD create events.
     Here we construct the required Kubernetes objects,

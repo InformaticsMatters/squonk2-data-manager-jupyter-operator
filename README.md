@@ -62,8 +62,8 @@ is automatically built and pushed to Docker Hub using GitHub Actions.
 You can build the image yourself using docker-compose.
 The following will build an operator image with the tag `19.0.0-alpha.1`: -
 
-    $ export IMAGE_TAG=19.0.0-alpha.1
-    $ docker-compose build
+    export IMAGE_TAG=19.0.0-alpha.1
+    docker-compose build
 
 ## Deploying into the Data Manager API
 We use [Ansible] 3 and community modules in [Ansible Galaxy] as the deployment
@@ -71,28 +71,28 @@ mechanism, using the `operator` Ansible role in this repository and a
 Kubernetes config (KUBECONFIG). All of this is done via a suitable Python
 environment using the requirements in the root of the project...
 
-    $ python -m venv ~/.venv/data-manager-jupyter-operator
-    $ source ~/.venv/data-manager-jupyter-operator/bin/activate
-    $ pip install --upgrade pip
-    $ pip install -r requirements.txt
-    $ ansible-galaxy install -r requirements.yaml
+    python -m venv ~/.venv/data-manager-jupyter-operator
+    source ~/.venv/data-manager-jupyter-operator/bin/activate
+    pip install --upgrade pip
+    pip install -r requirements.txt
+    ansible-galaxy install -r requirements.yaml
 
 Set your KUBECONFIG for the cluster and verify its right: -
 
-    $ export KUBECONFIG=~/k8s-config/local-config
-    $ kubectl get no
+    export KUBECONFIG=~/k8s-config/local-config
+    kubectl get no
     [...]
 
 Now, create a parameter file (i.e. `parameters.yaml`) based on the project's
 `example-parameters.yaml`, setting values for the operator that match your
 needs. Then deploy, using Ansible, from the root of the project: -
 
-    $ export PARAMS=parameters
-    $ ansible-playbook -e @${PARAMS}.yaml site.yaml
+    export PARAMS=parameters
+    ansible-playbook -e @${PARAMS}.yaml site.yaml
 
 To remove the operator (assuming there are no operator-derived instances)...
 
-    $ ansible-playbook -e @${PARAMS}.yaml -e jo_state=absent site.yaml
+    ansible-playbook -e @${PARAMS}.yaml -e jo_state=absent site.yaml
 
 >   The current Data Manager API assumes that once an Application (operator)
     has been installed it is not removed. So, removing the operator here
@@ -105,9 +105,9 @@ are held in this repository.
 
 To deploy: -
 
-    $ export KUBECONFIG=~/k8s-config/config-aws-im-main-eks
-    $ export PARAMS=staging
-    $ ansible-playbook -e @${PARAMS}-parameters.yaml site.yaml
+    export KUBECONFIG=~/k8s-config/config-aws-im-main-eks
+    export PARAMS=staging
+    ansible-playbook -e @${PARAMS}-parameters.yaml site.yaml
 
 >   You will need the vault password, held in the company's KeePass under
     `data-manager-jupyter-operator -> Ansible Vault Password`
@@ -162,7 +162,7 @@ Data Manager's **Namespace**.
 Typical **Role** and **RoleBinding** definitions are provided in this
 repository. Once you define yours you'll just need to create them: -
 
-    $ kubectl create -f data-manager-rbac.yaml
+    kubectl create -f data-manager-rbac.yaml
 
 With this done the application should be visible through the Data Manager API's
 **/application** REST endpoint.
