@@ -61,11 +61,12 @@ current health of your clone with: -
 The operator container, residing in the `operator` directory,
 is automatically built and pushed to Docker Hub using GitHub Actions.
 
-You can build the image yourself using docker-compose.
-The following will build an operator image with the tag `19.0.0-alpha.1`: -
+You can build and push the image yourself using docker-compose.
+The following will build an operator image with the tag `19.2.0-alpha.1`: -
 
-    export IMAGE_TAG=19.0.0-alpha.1
+    export IMAGE_TAG=19.2.0-alpha.1
     docker-compose build
+    dcoker-compose push
 
 ## Deploying into the Data Manager API
 We use [Ansible] 3 and community modules in [Ansible Galaxy] as the deployment
@@ -73,8 +74,8 @@ mechanism, using the `operator` Ansible role in this repository and a
 Kubernetes config (KUBECONFIG). All of this is done via a suitable Python
 environment using the requirements in the root of the project...
 
-    python -m venv ~/.venv/data-manager-jupyter-operator
-    source ~/.venv/data-manager-jupyter-operator/bin/activate
+    python -m venv venv
+    source venv/bin/activate
     pip install --upgrade pip
     pip install -r requirements.txt
     ansible-galaxy install -r requirements.yaml
