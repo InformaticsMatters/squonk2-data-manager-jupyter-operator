@@ -19,17 +19,19 @@ _DEFAULT_MEM_REQUEST: str = "256Mi"
 _DEFAULT_USER_ID: int = 1000
 _DEFAULT_GROUP_ID: int = 100
 _DEFAULT_INGRESS_PROXY_BODY_SIZE: str = "500m"
-
-# The ingress class
-_INGRESS_CLASS: str = "nginx"
-# The ingress domain must be provided.
-ingress_domain: str = os.environ["INGRESS_DOMAIN"]
-# The ingress TLS secret is optional.
+# The default ingress domain (must be provided).
+# The user can provide an alternative via the CR.
+_DEFAULT_INGRESS_DOMAIN: str = os.environ["INGRESS_DOMAIN"]
+# The ingress TLS secret.
 # If provided it is used as the Ingress secret
 # and cert-manager is avoided.
-ingress_tls_secret: Optional[str] = os.environ.get("INGRESS_TLS_SECRET")
+# The uer can provide their own via the CR.
+_DEFAULT_INGRESS_TLS_SECRET: Optional[str] = os.environ.get("INGRESS_TLS_SECRET")
+# The ingress class
+_DEFAULT_INGRESS_CLASS: str = "nginx"
+
 # The cert-manager issuer,
-# expected if a TLS certificate is not defined.
+# expected if a INGRESS_TLS_SECRET is not defined.
 ingress_cert_issuer: Optional[str] = os.environ.get("INGRESS_CERT_ISSUER")
 
 # Application node selection
@@ -322,8 +324,10 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
         "ingressProxyBodySize", _DEFAULT_INGRESS_PROXY_BODY_SIZE
     )
 
+    ingress_class = material.get("ingressClass", _DEFAULT_INGRESS_CLASS)
+    ingress_domain = material.get("ingressDomain", _DEFAULT_INGRESS_DOMAIN)
+    ingress_tls_secret = material.get("ingressTlsSecret", _DEFAULT_INGRESS_TLS_SECRET)
     ingress_path = f"/{name}"
-    tls_secret = ingress_tls_secret if ingress_tls_secret else f"{name}-tls"
 
     ingress_body: Dict[Any, Any] = {
         "kind": "Ingress",
@@ -332,12 +336,12 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
             "name": name,
             "labels": {"app": name},
             "annotations": {
-                "kubernetes.io/ingress.class": _INGRESS_CLASS,
+                "kubernetes.io/ingress.class": ingress_class,
                 "nginx.ingress.kubernetes.io/proxy-body-size": f"{ingress_proxy_body_size}",
             },
         },
         "spec": {
-            "tls": [{"hosts": [ingress_domain], "secretName": tls_secret}],
+            "tls": [{"hosts": [ingress_domain], "secretName": ingress_tls_secret}],
             "rules": [
                 {
                     "host": ingress_domain,
