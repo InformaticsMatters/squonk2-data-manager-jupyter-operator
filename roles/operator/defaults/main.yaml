@@ -31,6 +31,7 @@ jo_ingress_tls_secret: ''
 jo_ingress_cert_issuer: letsencrypt-nginx-production
 
 # The namespace of the Data Manager API.
+# It's here we deploy the 'rbac-data-manager' objects.
 jo_dmapi_namespace: data-manager-api
 
 # Jupyter node selection.
