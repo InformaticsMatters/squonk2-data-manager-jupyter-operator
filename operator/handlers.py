@@ -4,33 +4,35 @@ import logging
 import random
 import os
 import string
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import kubernetes
 import kopf
 
 # Some (key) default deployment variables...
-_DEFAULT_IMAGE = "jupyter/minimal-notebook:notebook-6.3.0"
-_DEFAULT_SA = "default"
-_DEFAULT_CPU_LIMIT = "1"
-_DEFAULT_CPU_REQUEST = "10m"
-_DEFAULT_MEM_LIMIT = "1Gi"
-_DEFAULT_MEM_REQUEST = "256Mi"
-_DEFAULT_USER_ID = 1000
-_DEFAULT_GROUP_ID = 100
-_DEFAULT_INGRESS_PROXY_BODY_SIZE = "500m"
-
-# The ingress class
-_INGRESS_CLASS = "nginx"
-# The ingress domain must be provided.
-ingress_domain = os.environ["INGRESS_DOMAIN"]
-# The ingress TLS secret is optional.
+_DEFAULT_IMAGE: str = "jupyter/minimal-notebook:notebook-6.3.0"
+_DEFAULT_SA: str = "default"
+_DEFAULT_CPU_LIMIT: str = "1"
+_DEFAULT_CPU_REQUEST: str = "10m"
+_DEFAULT_MEM_LIMIT: str = "1Gi"
+_DEFAULT_MEM_REQUEST: str = "256Mi"
+_DEFAULT_USER_ID: int = 1000
+_DEFAULT_GROUP_ID: int = 100
+_DEFAULT_INGRESS_PROXY_BODY_SIZE: str = "500m"
+# The default ingress domain (must be provided).
+# The user can provide an alternative via the CR.
+_DEFAULT_INGRESS_DOMAIN: str = os.environ["INGRESS_DOMAIN"]
+# The ingress TLS secret.
 # If provided it is used as the Ingress secret
 # and cert-manager is avoided.
-ingress_tls_secret = os.environ.get("INGRESS_TLS_SECRET")
+# The uer can provide their own via the CR.
+_DEFAULT_INGRESS_TLS_SECRET: Optional[str] = os.environ.get("INGRESS_TLS_SECRET")
+# The ingress class
+_DEFAULT_INGRESS_CLASS: str = "nginx"
+
 # The cert-manager issuer,
-# expected if a TLS certificate is not defined.
-ingress_cert_issuer = os.environ.get("INGRESS_CERT_ISSUER")
+# expected if a INGRESS_TLS_SECRET is not defined.
+ingress_cert_issuer: Optional[str] = os.environ.get("INGRESS_CERT_ISSUER")
 
 # Application node selection
 _POD_NODE_SELECTOR_KEY: str = os.environ.get(
@@ -51,7 +53,7 @@ _POD_NODE_SELECTOR_VALUE: str = os.environ.get("JO_POD_NODE_SELECTOR_VALUE", "ye
 # As part of the startup we erase the existing '~/.bashrc' and,
 # as a minimum, set a more suitable PS1 (see ch2385).
 # 'conda init' then puts its stuff into the same file.
-_NOTEBOOK_STARTUP = """#!/bin/bash
+_NOTEBOOK_STARTUP: str = """#!/bin/bash
 echo "PS1='\$(pwd) \$UID$ '" > ~/.bashrc
 echo "umask 0002" >> ~/.bashrc
 conda init
@@ -72,7 +74,7 @@ jupyter lab --config=~/jupyter_notebook_config.json
 
 # The bash-profile
 # which simply launches the .bashrc
-_BASH_PROFILE = """if [ -f ~/.bashrc ]; then
+_BASH_PROFILE: str = """if [ -f ~/.bashrc ]; then
     source ~/.bashrc
 fi
 """
@@ -81,7 +83,7 @@ fi
 # A ConfigMap whose content is written into '/etc'
 # and copied to the $HOME/.jupyter by the notebook_startup
 # script (above).
-_NOTEBOOK_CONFIG = """{
+_NOTEBOOK_CONFIG: str = """{
   "NotebookApp": {
     "token": "%(token)s",
     "base_url": "%(base_url)s"
@@ -97,7 +99,7 @@ def configure(settings: kopf.OperatorSettings, **_: Any) -> None:
     settings.posting.level = logging.INFO
 
 
-@kopf.on.create("squonk.it", "v1", "jupyternotebooks", id="jupyter")
+@kopf.on.create("squonk.it", "v2", "jupyternotebooks", id="jupyter")
 def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[str, Any]:
     """Handler for CRD create events.
     Here we construct the required Kubernetes objects,
@@ -322,8 +324,10 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
         "ingressProxyBodySize", _DEFAULT_INGRESS_PROXY_BODY_SIZE
     )
 
+    ingress_class = material.get("ingressClass", _DEFAULT_INGRESS_CLASS)
+    ingress_domain = material.get("ingressDomain", _DEFAULT_INGRESS_DOMAIN)
+    ingress_tls_secret = material.get("ingressTlsSecret", _DEFAULT_INGRESS_TLS_SECRET)
     ingress_path = f"/{name}"
-    tls_secret = ingress_tls_secret if ingress_tls_secret else f"{name}-tls"
 
     ingress_body: Dict[Any, Any] = {
         "kind": "Ingress",
@@ -332,12 +336,12 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
             "name": name,
             "labels": {"app": name},
             "annotations": {
-                "kubernetes.io/ingress.class": _INGRESS_CLASS,
+                "kubernetes.io/ingress.class": ingress_class,
                 "nginx.ingress.kubernetes.io/proxy-body-size": f"{ingress_proxy_body_size}",
             },
         },
         "spec": {
-            "tls": [{"hosts": [ingress_domain], "secretName": tls_secret}],
+            "tls": [{"hosts": [ingress_domain], "secretName": ingress_tls_secret}],
             "rules": [
                 {
                     "host": ingress_domain,

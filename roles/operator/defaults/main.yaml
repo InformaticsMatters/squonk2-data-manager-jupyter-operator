@@ -10,6 +10,9 @@ jo_kubeconfig: SetMe
 # The Operator container image and tag
 jo_image: informaticsmatters/data-manager-jupyter-operator
 jo_image_tag: SetMe
+
+# The namespace of the Jupyter Operator.
+jo_namespace: data-manager-jupyter-operator
 # The colon-separated list of namespaces
 # we want the CRD to be used with.
 jo_namespaces: data-manager-api
@@ -27,11 +30,9 @@ jo_ingress_tls_secret: ''
 # A certificate issuer (ignored if jo_ingress_tls_secret is set)
 jo_ingress_cert_issuer: letsencrypt-nginx-production
 
-# The name (and namespace) of the Data Manager API.
-# The namespace is where the operator will be located,
-# and is expected to exist.
-jo_dmapi_name: integration
-jo_dmapi_namespace: data-manager-api-{{ jo_dmapi_name }}
+# The namespace of the Data Manager API.
+# It's here we deploy the 'rbac-data-manager' objects.
+jo_dmapi_namespace: data-manager-api
 
 # Jupyter node selection.
 # Jupyter will be run on nodes that have labels keys and values defined here...

@@ -1,5 +1,5 @@
 ---
 # An Ansible Galaxy requirements file
 collections:
-- name: community.kubernetes
-  version: 1.2.1
+- name: kubernetes.core
+  version: 2.3.0

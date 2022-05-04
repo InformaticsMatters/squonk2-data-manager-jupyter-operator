@@ -27,7 +27,7 @@ spec:
       jsonPath: .status.jupyter.notebook.token
       name: Token
       type: string
-    name: v1
+    name: v2
     schema:
       openAPIV3Schema:
         type: object
@@ -43,6 +43,12 @@ spec:
                   taskId:
                     type: string
                   image:
+                    type: string
+                  ingressClass:
+                    type: string
+                  ingressDomain:
+                    type: string
+                  ingressTlsSecret:
                     type: string
                   ingressProxyBodySize:
                     type: string

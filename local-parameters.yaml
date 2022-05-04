@@ -1,0 +1,8 @@
+---
+
+jo_image_tag: 19.2.0
+jo_ingress_domain: kubernetes.docker.internal
+jo_dmapi_namespace: data-manager-api
+
+# The Kubernetes config file
+jo_kubeconfig: ~/k8s-config/config-local

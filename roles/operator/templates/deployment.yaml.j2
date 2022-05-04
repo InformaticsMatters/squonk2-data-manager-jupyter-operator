@@ -2,21 +2,21 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  namespace: {{ jo_dmapi_namespace }}
-  name: jupyternotebooks-operator
+  namespace: {{ jo_namespace }}
+  name: jupyter-operator
 spec:
   replicas: 1
   strategy:
     type: Recreate
   selector:
     matchLabels:
-      application: jupyternotebooks-operator
+      application: jupyter-operator
   template:
     metadata:
       labels:
-        application: jupyternotebooks-operator
+        application: jupyter-operator
     spec:
-      serviceAccountName: jupyternotebooks-account
+      serviceAccountName: jupyter-operator
 
       # Prefer 'application' nodes before 'core'
       affinity:
@@ -31,7 +31,7 @@ spec:
                 operator: Exists
 
       containers:
-      - name: jupyternotebooks-operator
+      - name: jupyter-operator
         image: {{ jo_image }}:{{ jo_image_tag }}
 {% if jo_image_tag in ['stable', 'latest'] %}
         imagePullPolicy: Always
