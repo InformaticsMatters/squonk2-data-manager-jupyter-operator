@@ -98,6 +98,12 @@ def configure(settings: kopf.OperatorSettings, **_: Any) -> None:
     # Here we adjust the logging level
     settings.posting.level = logging.INFO
 
+    # Attempt to protect ourselves from missing watch events.
+    # See https://github.com/nolar/kopf/issues/698
+    # Added in an attempt to prevent the operator "falling silent"
+    settings.watching.server_timeout = 120
+    settings.watching.client_timeout = 150
+
 
 @kopf.on.create("squonk.it", "v2", "jupyternotebooks", id="jupyter")
 def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[str, Any]:
