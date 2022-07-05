@@ -2,6 +2,12 @@
 
 - include_tasks: prep.yaml
 
+- name: Assert operator version defined
+  assert:
+    that:
+    - jo_image_tag|length > 0
+    - jo_image_tag != 'SetMe'
+
 - name: Deploy using Kubernetes config
   block:
 

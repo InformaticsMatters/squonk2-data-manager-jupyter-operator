@@ -23,9 +23,3 @@
     that:
     - jo_kubeconfig|length > 0
     - jo_kubeconfig != 'SetMe'
-
-- name: Assert operator version defined
-  assert:
-    that:
-    - jo_image_tag|length > 0
-    - jo_image_tag != 'SetMe'

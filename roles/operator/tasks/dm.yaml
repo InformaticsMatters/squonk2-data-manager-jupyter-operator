@@ -1,0 +1,43 @@
+---
+
+# A ply to deploy objects to the chosen Data Manager namespace.
+# In this case it's a Role and RoleBinding
+
+- include_tasks: prep.yaml
+
+# Check the Data Manager Namespace and Service Account exists...
+
+- name: Deploy DataManager RBAC objects
+  block:
+
+  - name: Get Data Manager Namespace ({{ jo_dmapi_namespace }})
+    kubernetes.core.k8s_info:
+      kind: Namespace
+      name: "{{ jo_dmapi_namespace }}"
+    register: ns_result
+
+  - name: Assert Namespace ({{ jo_dmapi_namespace }})
+    assert:
+      that:
+      - ns_result.resources|length == 1
+
+  - name: Get Data Manager ServiceAccount
+    kubernetes.core.k8s_info:
+      kind: ServiceAccount
+      name: data-manager
+      namespace: "{{ jo_dmapi_namespace }}"
+    register: sa_result
+
+  - name: Assert ServiceAccount
+    assert:
+      that:
+      - sa_result.resources|length == 1
+
+  - name: Deploy Data Manager API Operator RBAC
+    kubernetes.core.k8s:
+      definition: "{{ lookup('template', 'rbac-data-manager.yaml.j2') }}"
+      wait: yes
+
+  module_defaults:
+    group/k8s:
+      kubeconfig: "{{ jo_kubeconfig }}"

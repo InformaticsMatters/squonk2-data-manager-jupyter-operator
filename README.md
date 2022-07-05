@@ -93,6 +93,17 @@ needs. Then deploy, using Ansible, from the root of the project: -
     export PARAMS=parameters
     ansible-playbook -e @${PARAMS}.yaml site.yaml
 
+That deploys the operator and its CRD to your chosen operator namespace.
+To deploy the Data Manager RBAC objects you need to run the
+`site_dm.yaml` playbook: -
+
+    ansible-playbook -e @${PARAMS}.yaml site_dm.yaml
+
+>   If deploying to multiple Data Managers you should just need one operator
+    and then deploy RBACs to each DM namespace. Remember to also adjust the
+    annotations of for CRD so each DM namespace recognises it as a valid
+    application.
+
 To remove the operator (assuming there are no operator-derived instances)...
 
     ansible-playbook -e @${PARAMS}.yaml -e jo_state=absent site.yaml
