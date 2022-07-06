@@ -66,7 +66,7 @@ The following will build an operator image with the tag `19.2.0-alpha.1`: -
 
     export IMAGE_TAG=19.2.0-alpha.1
     docker-compose build
-    dcoker-compose push
+    docker-compose push
 
 ## Deploying into the Data Manager API
 We use [Ansible] 3 and community modules in [Ansible Galaxy] as the deployment

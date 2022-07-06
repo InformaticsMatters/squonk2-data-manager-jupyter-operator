@@ -105,3 +105,83 @@ spec:
             x-kubernetes-preserve-unknown-fields: true
     served: true
     storage: true
+  - additionalPrinterColumns:
+    - description: URL for acessing the Jupyter notebook.
+      jsonPath: .status.jupyter.notebook.url
+      name: URL
+      type: string
+    - description: Token for accessing the Jupyter notebook.
+      jsonPath: .status.jupyter.notebook.token
+      name: Token
+      type: string
+    name: v1alpha3
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              # All DataManager-injected material
+              # will be namespaced by the property 'imDataManager'
+              imDataManager:
+                type: object
+                properties:
+                  taskId:
+                    type: string
+                  image:
+                    type: string
+                  ingressProxyBodySize:
+                    type: string
+                  resources:
+                    type: object
+                    properties:
+                      limits:
+                        type: object
+                        properties:
+                          cpu:
+                            type: string
+                          memory:
+                            type: string
+                          storage:
+                            type: string
+                      requests:
+                        type: object
+                        properties:
+                          cpu:
+                            type: string
+                          memory:
+                            type: string
+                          storage:
+                            type: string
+                  serviceAccountName:
+                    type: string
+                  securityContext:
+                    type: object
+                    properties:
+                      runAsUser:
+                        type: integer
+                      runAsGroup:
+                        type: integer
+                      fsGroup:
+                        type: integer
+                  notebook:
+                    type: object
+                    properties:
+                      interface:
+                        type: string
+                  project:
+                    type: object
+                    properties:
+                      claimName:
+                        type: string
+                      id:
+                        type: string
+                  labels:
+                    type: array
+                    items:
+                      type: string
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+    served: false

@@ -105,6 +105,14 @@ def configure(settings: kopf.OperatorSettings, **_: Any) -> None:
     settings.watching.client_timeout = 150
 
 
+@kopf.on.create("squonk.it", "v1alpha3", "jupyternotebooks", id="jupyter")
+def create_v1alpha3(
+    spec: Dict[str, Any], name: str, namespace: str, **_: Any
+) -> Dict[str, Any]:
+    """Handler for legacy CRD create events."""
+    raise kopf.PermanentError("No longer supported")
+
+
 @kopf.on.create("squonk.it", "v2", "jupyternotebooks", id="jupyter")
 def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[str, Any]:
     """Handler for CRD create events.
