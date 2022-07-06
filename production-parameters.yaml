@@ -1,6 +1,6 @@
 ---
 
-jo_image_tag: 19.2.0
+jo_image_tag: 19.2.1
 jo_dmapi_namespace: data-manager-api-production
 
 jo_ingress_domain: squonk.it
