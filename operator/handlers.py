@@ -86,7 +86,8 @@ fi
 _NOTEBOOK_CONFIG: str = """{
   "NotebookApp": {
     "token": "%(token)s",
-    "base_url": "%(base_url)s"
+    "base_url": "%(base_url)s",
+    "ip": "0.0.0.0"
   }
 }
 """
