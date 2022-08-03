@@ -84,7 +84,7 @@ fi
 # and copied to the $HOME/.jupyter by the notebook_startup
 # script (above).
 _NOTEBOOK_CONFIG: str = """{
-  "NotebookApp": {
+  "ServerApp": {
     "token": "%(token)s",
     "base_url": "%(base_url)s",
     "ip": "0.0.0.0"
