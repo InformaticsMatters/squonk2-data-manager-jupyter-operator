@@ -1,25 +1,25 @@
 # A Jupyter Application Operator (for the Data Manager API)
 
-[![Data Manager: Application](https://img.shields.io/badge/data%20manager-application-000000?labelColor=dc332e)]()
+[![Data Manager: Application](https://img.shields.io/badge/squonk2%20data%20manager-application-000000?labelColor=dc332e)]()
 [![Dev Stage: 1](https://img.shields.io/badge/dev%20stage-★☆☆%20%281%29-000000?labelColor=dc332e)](https://github.com/InformaticsMatters/code-repository-development-stages)
 
 ![Architecture](https://img.shields.io/badge/architecture-amd64%20%7C%20arm64-lightgrey)
 
-[![build](https://github.com/informaticsmatters/data-manager-jupyter-operator/actions/workflows/build.yaml/badge.svg)](https://github.com/informaticsmatters/data-manager-jupyter-operator/actions/workflows/build.yaml)
-[![build latest](https://github.com/informaticsmatters/data-manager-jupyter-operator/actions/workflows/build-latest.yaml/badge.svg)](https://github.com/informaticsmatters/data-manager-jupyter-operator/actions/workflows/build-latest.yaml)
-[![build tag](https://github.com/informaticsmatters/data-manager-jupyter-operator/actions/workflows/build-tag.yaml/badge.svg)](https://github.com/informaticsmatters/data-manager-jupyter-operator/actions/workflows/build-tag.yaml)
-[![build stable](https://github.com/informaticsmatters/data-manager-jupyter-operator/actions/workflows/build-stable.yaml/badge.svg)](https://github.com/informaticsmatters/data-manager-jupyter-operator/actions/workflows/build-stable.yaml)
+[![build](https://github.com/informaticsmatters/squonk2-data-manager-jupyter-operator/actions/workflows/build.yaml/badge.svg)](https://github.com/informaticsmatters/squonk2-data-manager-jupyter-operator/actions/workflows/build.yaml)
+[![build latest](https://github.com/informaticsmatters/squonk2-data-manager-jupyter-operator/actions/workflows/build-latest.yaml/badge.svg)](https://github.com/informaticsmatters/squonk2-data-manager-jupyter-operator/actions/workflows/build-latest.yaml)
+[![build tag](https://github.com/informaticsmatters/squonk2-data-manager-jupyter-operator/actions/workflows/build-tag.yaml/badge.svg)](https://github.com/informaticsmatters/squonk2-data-manager-jupyter-operator/actions/workflows/build-tag.yaml)
+[![build stable](https://github.com/informaticsmatters/squonk2-data-manager-jupyter-operator/actions/workflows/build-stable.yaml/badge.svg)](https://github.com/informaticsmatters/squonk2-data-manager-jupyter-operator/actions/workflows/build-stable.yaml)
 
-![GitHub](https://img.shields.io/github/license/informaticsmatters/data-manager-jupyter-operator)
+![GitHub](https://img.shields.io/github/license/informaticsmatters/squonk2-data-manager-jupyter-operator)
 
-![GitHub tag (latest SemVer pre-release)](https://img.shields.io/github/v/tag/informaticsmatters/data-manager-jupyter-operator?include_prereleases)
+![GitHub tag (latest SemVer pre-release)](https://img.shields.io/github/v/tag/informaticsmatters/squonk2-data-manager-jupyter-operator?include_prereleases)
 
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 This repo contains a Kubernetes _Operator_ based on the [kopf] and [kubernetes]
-Python packages that is used by the **Informatics Matters Data Manager API**
+Python packages that is used by the **Informatics Matters Squonk2 Data Manager API**
 to create Jupyter Notebooks for the Data Manager service.
 
 The operator's Custom Resource Definition (CRD) can be found in
