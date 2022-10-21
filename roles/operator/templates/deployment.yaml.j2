@@ -39,6 +39,10 @@ spec:
         imagePullPolicy: IfNotPresent
 {% endif %}
         env:
+{% if jo_apply_pod_priority_class %}
+        - name: JO_APPLY_POD_PRIORITY_CLASS
+          value: 'true'
+{% endif %}
         - name: JO_POD_NODE_SELECTOR_KEY
           value: '{{ jo_pod_node_selector_key }}'
         - name: JO_POD_NODE_SELECTOR_VALUE

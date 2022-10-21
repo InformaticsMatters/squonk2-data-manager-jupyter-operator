@@ -30,6 +30,16 @@ _DEFAULT_INGRESS_TLS_SECRET: Optional[str] = os.environ.get("INGRESS_TLS_SECRET"
 # The ingress class
 _DEFAULT_INGRESS_CLASS: str = "nginx"
 
+# Apply Pod Priority class?
+# Any value results in setting the Pod's Priority Class
+_APPLY_POD_PRIORITY_CLASS: Optional[str] = os.environ.get("JO_APPLY_POD_PRIORITY_CLASS")
+# If set and JO_APPLY_POD_PRIORITY_CLASS is set
+# this value will be used if now alternative is available.
+_DEFAULT_POD_PRIORITY_CLASS: str = os.environ.get(
+    "JO_DEFAULT_POD_PRIORITY_CLASS", "im-worker-medium"
+)
+
+
 # The cert-manager issuer,
 # expected if a INGRESS_TLS_SECRET is not defined.
 ingress_cert_issuer: Optional[str] = os.environ.get("INGRESS_CERT_ISSUER")
@@ -283,6 +293,12 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
             },
         },
     }
+
+    # Insert a pod priority class?
+    if _APPLY_POD_PRIORITY_CLASS:
+        deployment_body["spec"]["template"]["spec"][
+            "priorityClassName"
+        ] = _DEFAULT_POD_PRIORITY_CLASS
 
     # Additional labels?
     # Provided by the DM as an array of strings of the form '<KEY>=<VALUE>'

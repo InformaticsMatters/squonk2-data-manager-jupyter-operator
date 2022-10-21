@@ -38,3 +38,6 @@ jo_dmapi_namespace: data-manager-api
 # Jupyter will be run on nodes that have labels keys and values defined here...
 jo_pod_node_selector_key: informaticsmatters.com/purpose-worker
 jo_pod_node_selector_value: 'yes'
+
+# Apply Priority Class to Pods launched
+jo_apply_pod_priority_class: no
