@@ -33,10 +33,13 @@
       that:
       - sa_result.resources|length == 1
 
-  - name: Deploy Data Manager API Operator RBAC
+  - name: Deploy Data Manager Material
     kubernetes.core.k8s:
-      definition: "{{ lookup('template', 'rbac-data-manager.yaml.j2') }}"
+      definition: "{{ lookup('template', '{{ item }}.yaml.j2') }}"
       wait: yes
+    loop:
+    - rbac-data-manager
+    - configmap-data-manager
 
   module_defaults:
     group/k8s:
