@@ -36,7 +36,7 @@ _APPLY_POD_PRIORITY_CLASS: Optional[str] = os.environ.get("JO_APPLY_POD_PRIORITY
 # If set and JO_APPLY_POD_PRIORITY_CLASS is set
 # this value will be used if now alternative is available.
 _DEFAULT_POD_PRIORITY_CLASS: str = os.environ.get(
-    "JO_DEFAULT_POD_PRIORITY_CLASS", "im-worker-medium"
+    "JO_DEFAULT_POD_PRIORITY_CLASS", "im-application-low"
 )
 
 
@@ -46,7 +46,7 @@ ingress_cert_issuer: Optional[str] = os.environ.get("INGRESS_CERT_ISSUER")
 
 # Application node selection
 _POD_NODE_SELECTOR_KEY: str = os.environ.get(
-    "JO_POD_NODE_SELECTOR_KEY", "informaticsmatters.com/purpose-worker"
+    "JO_POD_NODE_SELECTOR_KEY", "informaticsmatters.com/purpose-application"
 )
 _POD_NODE_SELECTOR_VALUE: str = os.environ.get("JO_POD_NODE_SELECTOR_VALUE", "yes")
 
