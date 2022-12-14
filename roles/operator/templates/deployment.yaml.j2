@@ -26,9 +26,6 @@ spec:
             - matchExpressions:
               - key: informaticsmatters.com/purpose-application
                 operator: Exists
-            - matchExpressions:
-              - key: {{ jo_fallback_node_selector_key }}
-                operator: Exists
 
       containers:
       - name: jupyter-operator
