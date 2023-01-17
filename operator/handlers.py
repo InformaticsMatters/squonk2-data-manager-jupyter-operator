@@ -318,9 +318,9 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
         c_env.append({"name": "JUPYTER_ENABLE_LAB", "value": "true"})
 
     # Add a Project UUID environment variable
-    c_env.append({"name": "DM_PROJECT_ID", "value": project_id})
-    # Add the instance owner (expected to have been extracted from a variable)
-    c_env.append({"name": "DM_INSTANCE_OWNER", "value": instance_owner})
+    c_env.append({"name": "DM_PROJECT_ID", "value": str(project_id)})
+    # Add the instance owner (expected to have been extracted from a label)
+    c_env.append({"name": "DM_INSTANCE_OWNER", "value": str(instance_owner)})
 
     kopf.adopt(deployment_body)
     apps_api = kubernetes.client.AppsV1Api()
