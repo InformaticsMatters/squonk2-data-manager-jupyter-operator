@@ -301,16 +301,26 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
         ] = _DEFAULT_POD_PRIORITY_CLASS
 
     # Additional labels?
-    # Provided by the DM as an array of strings of the form '<KEY>=<VALUE>'
+    #
+    # If we find a key ending with '/owner', keep it
+    # (for use as an environment variable later)
+    instance_owner = "Unknown"
     for label in material.get("labels", []):
         key, value = label.split("=")
         deployment_body["spec"]["template"]["metadata"]["labels"][key] = value
+        if key.endswith("/owner"):
+            instance_owner = value
 
     # To simplify the dynamic ENV adjustments we're about to make...
     c_env = deployment_body["spec"]["template"]["spec"]["containers"][0]["env"]
 
     if notebook_interface != "classic":
         c_env.append({"name": "JUPYTER_ENABLE_LAB", "value": "true"})
+
+    # Add a Project UUID environment variable
+    c_env.append({"name": "DM_PROJECT_ID", "value": str(project_id)})
+    # Add the instance owner (expected to have been extracted from a label)
+    c_env.append({"name": "DM_INSTANCE_OWNER", "value": str(instance_owner)})
 
     kopf.adopt(deployment_body)
     apps_api = kubernetes.client.AppsV1Api()
