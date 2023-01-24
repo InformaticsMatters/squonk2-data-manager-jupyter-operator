@@ -190,6 +190,12 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
     notebook_interface = material.get("notebook", {}).get("interface", "lab")
 
     image = material.get("image", _DEFAULT_IMAGE)
+    image_parts = image.split(":")
+    image_tag = "latest" if len(image_parts) == 1 else image_parts[1]
+    image_pull_policy = (
+        "Always" if image_tag.lower() in ["latest", "stable"] else "IfNotPresent"
+    )
+
     service_account = material.get("serviceAccountName", _DEFAULT_SA)
 
     resources = material.get("resources", {})
@@ -239,7 +245,7 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
                             "name": "notebook",
                             "image": image,
                             "command": command_items,
-                            "imagePullPolicy": "IfNotPresent",
+                            "imagePullPolicy": image_pull_policy,
                             "resources": {
                                 "requests": {
                                     "memory": memory_request,
