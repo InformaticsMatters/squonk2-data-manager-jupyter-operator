@@ -58,6 +58,10 @@ current health of your clone with: -
     pre-commit run --all-files
 
 ## Building the operator (local development)
+Pre-requisites: -
+
+- Docker Compose (v2)
+
 The operator container, residing in the `operator` directory,
 is automatically built and pushed to Docker Hub using GitHub Actions.
 
@@ -65,8 +69,8 @@ You can build and push the image yourself using docker-compose.
 The following will build an operator image with the tag `19.2.0-alpha.1`: -
 
     export IMAGE_TAG=19.2.0-alpha.1
-    docker-compose build
-    docker-compose push
+    docker compose build
+    docker compose push
 
 ## Deploying into the Data Manager API
 We use [Ansible] 3 and community modules in [Ansible Galaxy] as the deployment

@@ -3,11 +3,15 @@
 # A ply to deploy objects to the chosen Data Manager namespace.
 # In this case it's a Role and RoleBinding
 
-- include_tasks: prep.yaml
+- name: Prep
+  ansible.builtin.include_tasks: prep.yaml
 
 # Check the Data Manager Namespace and Service Account exists...
 
 - name: Deploy DataManager RBAC objects
+  module_defaults:
+    group/k8s:
+      kubeconfig: "{{ jo_kubeconfig }}"
   block:
 
   - name: Get Data Manager Namespace ({{ jo_dmapi_namespace }})
@@ -17,7 +21,7 @@
     register: ns_result
 
   - name: Assert Namespace ({{ jo_dmapi_namespace }})
-    assert:
+    ansible.builtin.assert:
       that:
       - ns_result.resources|length == 1
 
@@ -29,7 +33,7 @@
     register: sa_result
 
   - name: Assert ServiceAccount
-    assert:
+    ansible.builtin.assert:
       that:
       - sa_result.resources|length == 1
 
@@ -40,7 +44,3 @@
     loop:
     - rbac-data-manager
     - configmap-data-manager
-
-  module_defaults:
-    group/k8s:
-      kubeconfig: "{{ jo_kubeconfig }}"

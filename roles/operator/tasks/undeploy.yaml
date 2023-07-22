@@ -10,6 +10,7 @@
   register: ns_result
 
 - name: Remove operator material
+  when: ns_result.resources|length == 1
   block:
 
   - name: Remove operator Data Manager API RBAC
@@ -19,8 +20,6 @@
       state: absent
     loop:
     - rbac-data-manager
-
-  when: ns_result.resources|length == 1
 
 - name: Remove operator Namespace
   kubernetes.core.k8s:

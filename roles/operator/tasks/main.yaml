@@ -1,21 +1,23 @@
 ---
 
-- include_tasks: prep.yaml
+- name: Prep
+  ansible.builtin.include_tasks: prep.yaml
 
 - name: Assert operator version defined
-  assert:
+  ansible.builtin.assert:
     that:
     - jo_image_tag|length > 0
     - jo_image_tag != 'SetMe'
 
 - name: Deploy using Kubernetes config
-  block:
-
-  - include_tasks: deploy.yaml
-    when: jo_state|string == 'present'
-  - include_tasks: undeploy.yaml
-    when: jo_state|string == 'absent'
-
   module_defaults:
     group/k8s:
       kubeconfig: "{{ jo_kubeconfig }}"
+  block:
+
+  - name: Deploy
+    ansible.builtin.include_tasks: deploy.yaml
+    when: jo_state|string == 'present'
+  - name: Undeploy
+    ansible.builtin.include_tasks: undeploy.yaml
+    when: jo_state|string == 'absent'

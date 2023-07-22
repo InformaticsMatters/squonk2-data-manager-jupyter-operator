@@ -1,5 +1,7 @@
 ---
-- hosts: localhost
+- name: Localhost
+  hosts: localhost
   tasks:
-  - include_role:
+  - name: Operator
+    ansible.legacy.include_role:
       name: operator
