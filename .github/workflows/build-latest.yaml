@@ -26,7 +26,7 @@ on:
   schedule:
   # Build daily at 6:37am...
   - cron: '37 6 * * *'
-  
+
 jobs:
   build-latest:
     runs-on: ubuntu-latest
