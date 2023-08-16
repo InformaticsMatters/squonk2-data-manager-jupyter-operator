@@ -67,7 +67,7 @@ The operator container, residing in the `operator` directory,
 is automatically built and pushed to Docker Hub using GitHub Actions.
 
 You can build and push the image yourself using docker-compose.
-The following will build an operator image with the tag `19.2.0-alpha.1`: -
+The following will build an operator image with a specific tag: -
 
     export IMAGE_TAG=23.1.0-alpha.1
     docker compose build
