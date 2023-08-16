@@ -34,7 +34,7 @@ Prerequisites: -
 -   Python
 -   Docker
 -   A kubernetes config file
--   A compatible Kubernetes (e.g. 1.23 if the operator is built for 1.22 thru 1.24)
+-   A compatible Kubernetes (e.g. 1.22 thru 1.24 if the operator is built for 1.23)
 
 ## Contributing
 The project uses: -
