@@ -34,6 +34,7 @@ Prerequisites: -
 -   Python
 -   Docker
 -   A kubernetes config file
+-   A compatible Kubernetes (e.g. 1.22 thru 1.24 if the operator is built for 1.23)
 
 ## Contributing
 The project uses: -
@@ -66,9 +67,9 @@ The operator container, residing in the `operator` directory,
 is automatically built and pushed to Docker Hub using GitHub Actions.
 
 You can build and push the image yourself using docker-compose.
-The following will build an operator image with the tag `19.2.0-alpha.1`: -
+The following will build an operator image with a specific tag: -
 
-    export IMAGE_TAG=19.2.0-alpha.1
+    export IMAGE_TAG=23.1.0-alpha.1
     docker compose build
     docker compose push
 

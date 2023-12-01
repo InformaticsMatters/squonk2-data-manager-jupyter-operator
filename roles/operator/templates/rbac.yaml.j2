@@ -12,7 +12,7 @@ rules:
   resources: [namespaces]
   verbs: [list, watch]
 # Framework: admission webhook configuration management.
-- apiGroups: [admissionregistration.k8s.io/v1, admissionregistration.k8s.io/v1beta1]
+- apiGroups: [admissionregistration.k8s.io/v1, admissionregistration.k8s.io/v1]
   resources: [validatingwebhookconfigurations, mutatingwebhookconfigurations]
   verbs: [create, patch]
 # Framework: posting the events about the handlers progress/errors.
