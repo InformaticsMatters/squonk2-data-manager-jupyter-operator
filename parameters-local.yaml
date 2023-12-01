@@ -1,0 +1,13 @@
+---
+
+# A set of parameters for local deployment (Rancher Desktop and the like).
+# This can also be tuned with some extra material via the following
+# environment variables: -
+#
+# - IM_DEV_JUPO_IMAGE_TAG
+
+jo_kubeconfig: "{{ lookup('env', 'KUBECONFIG') }}"
+
+jo_image_tag: "{{ lookup('env', 'IM_DEV_JUPO_IMAGE_TAG') | default('23.0.0', True) }}"
+jo_ingress_domain: squonk2
+jo_dmapi_namespace: im-data-manager
