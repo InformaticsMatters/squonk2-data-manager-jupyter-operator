@@ -99,8 +99,8 @@ needs. Then deploy, using Ansible, from the root of the project: -
     ansible-playbook -e @${PARAMS}.yaml site.yaml
 
 That deploys the operator and its CRD to your chosen operator namespace.
-To deploy the Data Manager RBAC objects you need to run the
-`site_dm.yaml` playbook: -
+To deploy the Data Manager RBAC and Jupyter notebook configuration objects
+you need to run the `site_dm.yaml` playbook: -
 
     ansible-playbook -e @${PARAMS}.yaml site_dm.yaml
 
