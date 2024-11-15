@@ -1,0 +1,5 @@
+---
+
+jo_kubeconfig: "{{ lookup('env', 'KUBECONFIG') }}"
+
+jo_dmapi_namespace: data-manager-api-sygnature
