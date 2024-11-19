@@ -122,14 +122,26 @@ To remove the operator (assuming there are no operator-derived instances)...
 The parameters used to deploy the operator to our 'official' cluster
 are held in this repository.
 
-To deploy: -
+To deploy the operator itself run the main 'site' playbook with
+a suitable set of parameters: -
 
     export KUBECONFIG=~/k8s-config/config-aws-im-main-eks
     export PARAMS=staging
     ansible-playbook -e @${PARAMS}-parameters.yaml site.yaml
 
->   You will need the vault password, held in the company's KeePass under
-    `data-manager-jupyter-operator -> Ansible Vault Password`
+Then, you must run the `site_dm` playbook to for each Data Manager
+you wish to configure: -
+
+    ansible-playbook -e @${PARAMS}-parameters.yaml \
+        -e jo_dmapi_namespace=data-manager-api-dev \
+        site_dm.yaml
+
+    ansible-playbook -e @${PARAMS}-parameters.yaml \
+        -e jo_dmapi_namespace=data-manager-api-test \
+        site_dm.yaml
+
+This wil install the RBAC and configuration objects for Jupyter
+to the DM namespace.
 
 # Data Manager Application Compliance
 In order to expose the CRD as an _Application_ in the Data Manager API service

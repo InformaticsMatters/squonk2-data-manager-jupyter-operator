@@ -1,0 +1,11 @@
+---
+
+jo_image_tag: 31.0.0
+jo_dmapi_namespace: data-manager-api-dev
+
+jo_ingress_domain: data-manager.xchem-dev.diamond.ac.uk
+jo_ingress_tls_secret: data-manager-api-tls
+jo_namespaces: data-manager-api-dev:data-manager-api-test
+jo_fallback_node_selector_key: informaticsmatters.com/purpose-core
+
+jo_kubeconfig: "{{ lookup('env', 'KUBECONFIG') }}"
