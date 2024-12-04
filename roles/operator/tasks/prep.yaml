@@ -18,8 +18,31 @@
   ansible.builtin.debug:
     var: freeze.stdout_lines
 
-- name: Assert kubeconfig defined
+# Kubernetes credentials ------------------------------------------------------
+
+# We don't use the Kubernetes credentials directly,
+# but we load them into variables here from their
+# expected environment variables so that we can assert they've been set.
+
+- name: Set initial authentication facts
+  set_fact:
+    k8s_auth_host: "{{ lookup('env', 'K8S_AUTH_HOST') }}"
+    k8s_auth_api_key: "{{ lookup('env', 'K8S_AUTH_API_KEY') }}"
+
+# A kubernetes host and an API key must be set.
+# Either environment variables will have been set by the user
+# or AWX 'kubernetes' credentials will have injected them.
+# Either way the variables 'k8s_auth_host' and
+# 'k8s_auth_api_key' must have been set.
+- name: Assert kubernetes authentication (no kubeconfig)
+  assert:
+    that:
+    - k8s_auth_host|string|length > 0
+    - k8s_auth_api_key|string|length > 0
+  when: jo_kubeconfig == 'SetMe'
+
+- name: Assert kubeconfig defined (kubeconfig)
   ansible.builtin.assert:
     that:
     - jo_kubeconfig|length > 0
-    - jo_kubeconfig != 'SetMe'
+  when: jo_kubeconfig != 'SetMe'

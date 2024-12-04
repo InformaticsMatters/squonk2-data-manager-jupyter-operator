@@ -9,15 +9,29 @@
     - jo_image_tag|length > 0
     - jo_image_tag != 'SetMe'
 
-- name: Deploy using Kubernetes config
+- name: Deploy (with k8s kubeconfig)
+  block:
+
+  - name: Deploy (k8s kubeconfig)
+    ansible.builtin.include_tasks: deploy.yaml
+    when: jo_state|string == 'present'
+  - name: Undeploy (k8s kubeconfig)
+    ansible.builtin.include_tasks: undeploy.yaml
+    when: jo_state|string == 'absent'
+
   module_defaults:
     group/k8s:
       kubeconfig: "{{ jo_kubeconfig }}"
+  when: jo_kubeconfig != 'SetMe'
+
+- name: Deploy (with k8s host and API key)
   block:
 
-  - name: Deploy
+  - name: Deploy (k8s API key)
     ansible.builtin.include_tasks: deploy.yaml
     when: jo_state|string == 'present'
-  - name: Undeploy
+  - name: Undeploy (k8s API key)
     ansible.builtin.include_tasks: undeploy.yaml
     when: jo_state|string == 'absent'
+
+  when: jo_kubeconfig == 'SetMe'
