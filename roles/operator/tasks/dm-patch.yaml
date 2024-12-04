@@ -1,0 +1,32 @@
+---
+
+- name: Get Data Manager Namespace ({{ jo_dmapi_namespace }})
+  kubernetes.core.k8s_info:
+    kind: Namespace
+    name: "{{ jo_dmapi_namespace }}"
+  register: ns_result
+
+- name: Assert Namespace ({{ jo_dmapi_namespace }})
+  ansible.builtin.assert:
+    that:
+    - ns_result.resources|length == 1
+
+- name: Get Data Manager ServiceAccount
+  kubernetes.core.k8s_info:
+    kind: ServiceAccount
+    name: data-manager
+    namespace: "{{ jo_dmapi_namespace }}"
+  register: sa_result
+
+- name: Assert ServiceAccount
+  ansible.builtin.assert:
+    that:
+    - sa_result.resources|length == 1
+
+- name: Deploy Data Manager Material
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', '{{ item }}.yaml.j2') }}"
+    wait: yes
+  loop:
+  - rbac-data-manager
+  - configmap-data-manager
