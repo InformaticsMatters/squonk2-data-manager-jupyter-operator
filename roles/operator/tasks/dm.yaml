@@ -8,6 +8,10 @@
 
 # Check the Data Manager Namespace and Service Account exists...
 
+- name: Display namespace
+  ansible.builtin.debug:
+    var: jo_dmapi_namespace
+
 - name: Deploy DataManager RBAC objects (kubeconfig)
   when: jo_kubeconfig != 'SetMe'
   module_defaults:
@@ -15,12 +19,12 @@
       kubeconfig: "{{ jo_kubeconfig }}"
   block:
 
-  - name: Patch the Data Manager ({{ jo_dmapi_namespace }}) (kubeconfig)
+  - name: Patch the Data Manager (kubeconfig)
     ansible.builtin.include_tasks: dm-patch.yaml
 
 - name: Deploy DataManager RBAC objects (k8s API)
   when: jo_kubeconfig == 'SetMe'
   block:
 
-  - name: Patch the Data Manager ({{ jo_dmapi_namespace }}) (k8s API)
+  - name: Patch the Data Manager (k8s API)
     ansible.builtin.include_tasks: dm-patch.yaml
