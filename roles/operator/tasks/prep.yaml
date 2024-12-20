@@ -25,7 +25,7 @@
 # expected environment variables so that we can assert they've been set.
 
 - name: Set initial authentication facts
-  set_fact:
+  ansible.builtin.set_fact:
     k8s_auth_host: "{{ lookup('env', 'K8S_AUTH_HOST') }}"
     k8s_auth_api_key: "{{ lookup('env', 'K8S_AUTH_API_KEY') }}"
 
@@ -35,7 +35,7 @@
 # Either way the variables 'k8s_auth_host' and
 # 'k8s_auth_api_key' must have been set.
 - name: Assert kubernetes authentication (no kubeconfig)
-  assert:
+  ansible.builtin.assert:
     that:
     - k8s_auth_host|string|length > 0
     - k8s_auth_api_key|string|length > 0
