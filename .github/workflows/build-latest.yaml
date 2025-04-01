@@ -24,8 +24,8 @@ on:
     branches:
     - 'main'
   schedule:
-  # Build daily at 6:37am...
-  - cron: '37 6 * * *'
+  # Build on Monday (1) mornings at 6:37am...
+  - cron: '37 6 * * 1'
 
 jobs:
   build-latest:
