@@ -142,48 +142,6 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
     logging.info("Starting create (name=%s namespace=%s)...", name, namespace)
     logging.info("spec=%s (name=%s)", spec, name)
 
-    # ConfigMaps
-    # ----------
-
-    logging.info("Creating ConfigMaps %s...", name)
-
-    bp_cm_body = {
-        "apiVersion": "v1",
-        "kind": "ConfigMap",
-        "metadata": {"name": f"bp-{name}", "labels": {"app": name}},
-        "data": {".bash_profile": _BASH_PROFILE},
-    }
-
-    startup_cm_body = {
-        "apiVersion": "v1",
-        "kind": "ConfigMap",
-        "metadata": {"name": f"startup-{name}", "labels": {"app": name}},
-        "data": {"start.sh": _NOTEBOOK_STARTUP},
-    }
-
-    config_vars = {"token": token, "base_url": name}
-    config_cm_body = {
-        "apiVersion": "v1",
-        "kind": "ConfigMap",
-        "metadata": {"name": f"config-{name}", "labels": {"app": name}},
-        "data": {"jupyter_notebook_config.json": _NOTEBOOK_CONFIG % config_vars},
-    }
-
-    kopf.adopt(bp_cm_body)
-    kopf.adopt(startup_cm_body)
-    kopf.adopt(config_cm_body)
-    core_api = kubernetes.client.CoreV1Api()
-    core_api.create_namespaced_config_map(namespace, bp_cm_body)
-    core_api.create_namespaced_config_map(namespace, startup_cm_body)
-    core_api.create_namespaced_config_map(namespace, config_cm_body)
-
-    logging.info("Created ConfigMaps")
-
-    # Deployment
-    # ----------
-
-    logging.info("Creating Deployment %s...", name)
-
     # All Data-Manager provided material
     # will be namespaced under the 'imDataManager' property
     material: Dict[str, Any] = spec.get("imDataManager", {})
@@ -223,6 +181,89 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
     # Project storage
     project_claim_name = material.get("project", {}).get("claimName")
     project_id = material.get("project", {}).get("id")
+
+    ingress_proxy_body_size = material.get(
+        "ingressProxyBodySize", _DEFAULT_INGRESS_PROXY_BODY_SIZE
+    )
+
+    ingress_class = material.get("ingressClass", _DEFAULT_INGRESS_CLASS)
+    ingress_domain = material.get("ingressDomain", _DEFAULT_INGRESS_DOMAIN)
+    ingress_tls_secret = material.get("ingressTlsSecret", _DEFAULT_INGRESS_TLS_SECRET)
+    ingress_path = f"/{name}"
+
+    # ConfigMaps
+    # ----------
+
+    logging.info("Creating ConfigMaps %s...", name)
+
+    bp_cm_body = {
+        "apiVersion": "v1",
+        "kind": "ConfigMap",
+        "metadata": {"name": f"bp-{name}", "labels": {"app": name}},
+        "data": {".bash_profile": _BASH_PROFILE},
+    }
+
+    startup_cm_body = {
+        "apiVersion": "v1",
+        "kind": "ConfigMap",
+        "metadata": {"name": f"startup-{name}", "labels": {"app": name}},
+        "data": {"start.sh": _NOTEBOOK_STARTUP},
+    }
+
+    config_vars = {"token": token, "base_url": name}
+    config_cm_body = {
+        "apiVersion": "v1",
+        "kind": "ConfigMap",
+        "metadata": {"name": f"config-{name}", "labels": {"app": name}},
+        "data": {"jupyter_notebook_config.json": _NOTEBOOK_CONFIG % config_vars},
+    }
+
+    create_response = {
+        "notebook": {
+            "url": f"http://{ingress_domain}{ingress_path}?token={token}",
+            "token": token,
+            "interface": notebook_interface,
+        },
+        "image": image,
+        "serviceAccountName": service_account,
+        "resources": {
+            "requests": {"memory": memory_request},
+            "limits": {"memory": memory_limit},
+        },
+        "project": {"claimName": project_claim_name, "id": project_id},
+    }
+
+    kopf.adopt(bp_cm_body)
+    kopf.adopt(startup_cm_body)
+    kopf.adopt(config_cm_body)
+    core_api = kubernetes.client.CoreV1Api()
+
+    # We currently see a number of 409 exceptions with the objects we create
+    # (with the reason 'Conflict'). As each one has a unique name
+    # we have to assume there is a serious underlying problem
+    # in kopf of kubernetes. For now, if the first object we create
+    # already exists let us assume they all do?
+    #
+    # Added as a work-wround for sc-
+    try:
+        core_api.create_namespaced_config_map(namespace, bp_cm_body)
+    except kubernetes.client.exceptions.ApiException as ex:
+        if ex.status != 409 or ex.reason != "Conflict":
+            raise ex
+        # Warn, but ignore and return a valid 'create' response now.
+        logging.warning(
+            "Got ApiException [409/Conflict] creating BP ConfigMap. Ignoring [#10]"
+        )
+        return create_response
+    core_api.create_namespaced_config_map(namespace, startup_cm_body)
+    core_api.create_namespaced_config_map(namespace, config_cm_body)
+
+    logging.info("Created ConfigMaps")
+
+    # Deployment
+    # ----------
+
+    logging.info("Creating Deployment %s...", name)
 
     # Command is simply our custom start script,
     # which is mounted at /usr/local/bin
@@ -368,15 +409,6 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
 
     logging.info("Creating Ingress %s...", name)
 
-    ingress_proxy_body_size = material.get(
-        "ingressProxyBodySize", _DEFAULT_INGRESS_PROXY_BODY_SIZE
-    )
-
-    ingress_class = material.get("ingressClass", _DEFAULT_INGRESS_CLASS)
-    ingress_domain = material.get("ingressDomain", _DEFAULT_INGRESS_DOMAIN)
-    ingress_tls_secret = material.get("ingressTlsSecret", _DEFAULT_INGRESS_TLS_SECRET)
-    ingress_path = f"/{name}"
-
     ingress_body: Dict[Any, Any] = {
         "kind": "Ingress",
         "apiVersion": "networking.k8s.io/v1",
@@ -424,17 +456,4 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
     # Done
     # ----
 
-    return {
-        "notebook": {
-            "url": f"http://{ingress_domain}{ingress_path}?token={token}",
-            "token": token,
-            "interface": notebook_interface,
-        },
-        "image": image,
-        "serviceAccountName": service_account,
-        "resources": {
-            "requests": {"memory": memory_request},
-            "limits": {"memory": memory_limit},
-        },
-        "project": {"claimName": project_claim_name, "id": project_id},
-    }
+    return create_response
