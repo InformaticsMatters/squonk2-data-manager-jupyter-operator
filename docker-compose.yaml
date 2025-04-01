@@ -16,8 +16,6 @@
 #   IMAGE_TAG=19.3.0-alpha.1 docker compose build
 #   IMAGE_TAG=19.3.0-alpha.1 docker compose push
 
-version: '3.8'
-
 services:
   operator:
     build:
