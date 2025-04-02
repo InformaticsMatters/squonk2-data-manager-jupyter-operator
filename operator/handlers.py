@@ -1,5 +1,4 @@
-"""A kopf handler for the Jupyter CRD.
-"""
+"""A kopf handler for the Jupyter CRD."""
 
 import logging
 import random
@@ -9,6 +8,14 @@ from typing import Any, Dict, Optional
 
 import kubernetes
 import kopf
+
+# Configuration of underlying API requests.
+#
+# Request timeout (from Python Kubernetes API)
+#   If one number provided, it will be total request
+#   timeout. It can also be a pair (tuple) of
+#   (connection, read) timeouts.
+_REQUEST_TIMEOUT = (30, 20)
 
 # Some (key) default deployment variables...
 _DEFAULT_IMAGE: str = "jupyter/minimal-notebook:notebook-6.3.0"
@@ -246,7 +253,9 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
     #
     # Added as a work-wround for sc-
     try:
-        core_api.create_namespaced_config_map(namespace, bp_cm_body)
+        core_api.create_namespaced_config_map(
+            namespace, bp_cm_body, _request_timeout=_REQUEST_TIMEOUT
+        )
     except kubernetes.client.exceptions.ApiException as ex:
         if ex.status != 409 or ex.reason != "Conflict":
             raise ex
@@ -255,8 +264,12 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
             "Got ApiException [409/Conflict] creating BP ConfigMap. Ignoring [#10]"
         )
         return create_response
-    core_api.create_namespaced_config_map(namespace, startup_cm_body)
-    core_api.create_namespaced_config_map(namespace, config_cm_body)
+    core_api.create_namespaced_config_map(
+        namespace, startup_cm_body, _request_timeout=_REQUEST_TIMEOUT
+    )
+    core_api.create_namespaced_config_map(
+        namespace, config_cm_body, _request_timeout=_REQUEST_TIMEOUT
+    )
 
     logging.info("Created ConfigMaps")
 
@@ -372,7 +385,9 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
 
     kopf.adopt(deployment_body)
     apps_api = kubernetes.client.AppsV1Api()
-    apps_api.create_namespaced_deployment(namespace, deployment_body)
+    apps_api.create_namespaced_deployment(
+        namespace, deployment_body, _request_timeout=_REQUEST_TIMEOUT
+    )
 
     logging.info("Created deployment")
 
@@ -400,7 +415,9 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
     }
 
     kopf.adopt(service_body)
-    core_api.create_namespaced_service(namespace, service_body)
+    core_api.create_namespaced_service(
+        namespace, service_body, _request_timeout=_REQUEST_TIMEOUT
+    )
 
     logging.info("Created service")
 
@@ -449,7 +466,9 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
 
     kopf.adopt(ingress_body)
     ext_api = kubernetes.client.NetworkingV1Api()
-    ext_api.create_namespaced_ingress(namespace, ingress_body)
+    ext_api.create_namespaced_ingress(
+        namespace, ingress_body, _request_timeout=_REQUEST_TIMEOUT
+    )
 
     logging.info("Created ingress")
 
