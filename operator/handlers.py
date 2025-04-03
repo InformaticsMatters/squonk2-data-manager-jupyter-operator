@@ -262,11 +262,13 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
         core_api.create_namespaced_config_map(
             namespace, config_cm_body, _request_timeout=_REQUEST_TIMEOUT
         )
+        logging.info("Created CONFIG ConfigMap %s", cm_name)
 
+    cm_name = f"bp-{name}"
     bp_cm_body = {
         "apiVersion": "v1",
         "kind": "ConfigMap",
-        "metadata": {"name": f"bp-{name}", "labels": {"app": name}},
+        "metadata": {"name": cm_name, "labels": {"app": name}},
         "data": {".bash_profile": _BASH_PROFILE},
     }
     kopf.adopt(bp_cm_body)
@@ -274,18 +276,21 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
         core_api.create_namespaced_config_map(
             namespace, bp_cm_body, _request_timeout=_REQUEST_TIMEOUT
         )
+        logging.info("Created BP ConfigMap (%s)", cm_name)
     except kubernetes.client.exceptions.ApiException as ex:
         if ex.status != 409 or ex.reason != "Conflict":
             raise ex
         # Warn, but ignore and return a valid 'create' response now.
-        logging.warning(
-            "Got ApiException [409/Conflict] creating BP ConfigMap. Ignoring"
+        logging.info(
+            "Got 409/Conflict creating BP ConfigMap %s. Ignoring - object already present",
+            cm_name,
         )
 
+    cm_name = f"startup-{name}"
     startup_cm_body = {
         "apiVersion": "v1",
         "kind": "ConfigMap",
-        "metadata": {"name": f"startup-{name}", "labels": {"app": name}},
+        "metadata": {"name": cm_name, "labels": {"app": name}},
         "data": {"start.sh": _NOTEBOOK_STARTUP},
     }
     kopf.adopt(startup_cm_body)
@@ -293,15 +298,15 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
         core_api.create_namespaced_config_map(
             namespace, startup_cm_body, _request_timeout=_REQUEST_TIMEOUT
         )
+        logging.info("Created STARTUP ConfigMap (%s)", cm_name)
     except kubernetes.client.exceptions.ApiException as ex:
         if ex.status != 409 or ex.reason != "Conflict":
             raise ex
         # Warn, but ignore and return a valid 'create' response now.
-        logging.warning(
-            "Got ApiException [409/Conflict] creating STARTUP ConfigMap. Ignoring"
+        logging.info(
+            "Got 409/Conflict creating STARTUP ConfigMap %s. Ignoring - object already present",
+            cm_name,
         )
-
-    logging.info("Created ConfigMaps")
 
     # Deployment
     # ----------
@@ -420,15 +425,15 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
         apps_api.create_namespaced_deployment(
             namespace, deployment_body, _request_timeout=_REQUEST_TIMEOUT
         )
+        logging.info("Created Deployment %s", name)
     except kubernetes.client.exceptions.ApiException as ex:
         if ex.status != 409 or ex.reason != "Conflict":
             raise ex
         # Warn, but ignore and return a valid 'create' response now.
-        logging.warning(
-            "Got ApiException [409/Conflict] creating CONFIG ConfigMap. Ignoring"
+        logging.info(
+            "Got 409/Conflict creating Deployment %s. Ignoring - object already present",
+            name,
         )
-
-    logging.info("Created deployment")
 
     # Service
     # -------
@@ -458,15 +463,15 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
         core_api.create_namespaced_service(
             namespace, service_body, _request_timeout=_REQUEST_TIMEOUT
         )
+        logging.info("Created Service %s", name)
     except kubernetes.client.exceptions.ApiException as ex:
         if ex.status != 409 or ex.reason != "Conflict":
             raise ex
         # Warn, but ignore and return a valid 'create' response now.
-        logging.warning(
-            "Got ApiException [409/Conflict] creating CONFIG ConfigMap. Ignoring"
+        logging.info(
+            "Got 409/Conflict creating Service %s. Ignoring - object already present",
+            name,
         )
-
-    logging.info("Created service")
 
     # Ingress
     # -------
@@ -518,18 +523,20 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
         ext_api.create_namespaced_ingress(
             namespace, ingress_body, _request_timeout=_REQUEST_TIMEOUT
         )
+        logging.info("Created Ingress %s", name)
     except kubernetes.client.exceptions.ApiException as ex:
         if ex.status != 409 or ex.reason != "Conflict":
             raise ex
         # Warn, but ignore and return a valid 'create' response now.
-        logging.warning(
-            "Got ApiException [409/Conflict] creating CONFIG ConfigMap. Ignoring"
+        logging.info(
+            "Got 409/Conflict creating Ingress %s. Ignoring - object already present",
+            name,
         )
-
-    logging.info("Created ingress")
 
     # Done
     # ----
+    logging.info("Success! (name=%s namespace=%s)", name, namespace)
+
     return {
         "notebook": {
             "url": f"http://{ingress_domain}{ingress_path}?token={token}",
