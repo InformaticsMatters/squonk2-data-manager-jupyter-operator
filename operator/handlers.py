@@ -148,8 +148,8 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
     Kubernetes constantly calling back for a given create.
     """
 
-    logging.info("Starting create (name=%s namespace=%s)...", name, namespace)
-    logging.info("spec=%s (name=%s)", spec, name)
+    logging.info("Creating %s (namespace=%s)...", name, namespace)
+    logging.info("Incoming %s spec=%s", name, spec)
 
     # All Data-Manager provided material
     # will be namespaced under the 'imDataManager' property
@@ -221,23 +221,30 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
     except kubernetes.client.exceptions.ApiException as ex:
         # We 'expect' 404, anything else is an error
         if ex.status != 404:
-            logging.warning(
-                "Got ApiException [%s/%s] getting CONFIG ConfigMap",
+            logging.error(
+                "Got ApiException [%s/%s] getting existing CONFIG ConfigMap %s",
                 ex.status,
                 ex.reason,
+                cm_name,
             )
             raise ex
     if config_cm:
         # We retrieved an existing CONFIG - extract the token from it
         json_data = json.loads(config_cm.data[json_data_key])
         token = json_data["ServerApp"]["token"]
-        logging.info("Retrieved prior token from CONFIG ConfigMap (%s)", token)
+        logging.debug(
+            "Retrieved prior token from CONFIG ConfigMap %s (%s)",
+            cm_name,
+            token,
+        )
     else:
         # No prior config - we're free to allocate a new token
         characters = string.ascii_letters + string.digits
         token = "".join(random.sample(characters, 16))
-        logging.info(
-            "No prior CONFIG ConfigMap exists, assigning new token (%s)", token
+        logging.debug(
+            "No prior CONFIG ConfigMap exists for %s, assigning new token (%s)",
+            cm_name,
+            token,
         )
     assert token
 
@@ -262,7 +269,7 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
         core_api.create_namespaced_config_map(
             namespace, config_cm_body, _request_timeout=_REQUEST_TIMEOUT
         )
-        logging.info("Created CONFIG ConfigMap %s", cm_name)
+        logging.debug("Created CONFIG ConfigMap %s", cm_name)
 
     cm_name = f"bp-{name}"
     bp_cm_body = {
@@ -276,12 +283,12 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
         core_api.create_namespaced_config_map(
             namespace, bp_cm_body, _request_timeout=_REQUEST_TIMEOUT
         )
-        logging.info("Created BP ConfigMap (%s)", cm_name)
+        logging.debug("Created BP ConfigMap %s", cm_name)
     except kubernetes.client.exceptions.ApiException as ex:
         if ex.status != 409 or ex.reason != "Conflict":
             raise ex
         # Warn, but ignore and return a valid 'create' response now.
-        logging.info(
+        logging.debug(
             "Got 409/Conflict creating BP ConfigMap %s. Ignoring - object already present",
             cm_name,
         )
@@ -298,12 +305,12 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
         core_api.create_namespaced_config_map(
             namespace, startup_cm_body, _request_timeout=_REQUEST_TIMEOUT
         )
-        logging.info("Created STARTUP ConfigMap (%s)", cm_name)
+        logging.debug("Created STARTUP ConfigMap %s", cm_name)
     except kubernetes.client.exceptions.ApiException as ex:
         if ex.status != 409 or ex.reason != "Conflict":
             raise ex
         # Warn, but ignore and return a valid 'create' response now.
-        logging.info(
+        logging.debug(
             "Got 409/Conflict creating STARTUP ConfigMap %s. Ignoring - object already present",
             cm_name,
         )
@@ -425,12 +432,12 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
         apps_api.create_namespaced_deployment(
             namespace, deployment_body, _request_timeout=_REQUEST_TIMEOUT
         )
-        logging.info("Created Deployment %s", name)
+        logging.debug("Created Deployment %s", name)
     except kubernetes.client.exceptions.ApiException as ex:
         if ex.status != 409 or ex.reason != "Conflict":
             raise ex
         # Warn, but ignore and return a valid 'create' response now.
-        logging.info(
+        logging.debug(
             "Got 409/Conflict creating Deployment %s. Ignoring - object already present",
             name,
         )
@@ -463,12 +470,12 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
         core_api.create_namespaced_service(
             namespace, service_body, _request_timeout=_REQUEST_TIMEOUT
         )
-        logging.info("Created Service %s", name)
+        logging.debug("Created Service %s", name)
     except kubernetes.client.exceptions.ApiException as ex:
         if ex.status != 409 or ex.reason != "Conflict":
             raise ex
         # Warn, but ignore and return a valid 'create' response now.
-        logging.info(
+        logging.debug(
             "Got 409/Conflict creating Service %s. Ignoring - object already present",
             name,
         )
@@ -523,19 +530,19 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
         ext_api.create_namespaced_ingress(
             namespace, ingress_body, _request_timeout=_REQUEST_TIMEOUT
         )
-        logging.info("Created Ingress %s", name)
+        logging.debug("Created Ingress %s", name)
     except kubernetes.client.exceptions.ApiException as ex:
         if ex.status != 409 or ex.reason != "Conflict":
             raise ex
         # Warn, but ignore and return a valid 'create' response now.
-        logging.info(
+        logging.debug(
             "Got 409/Conflict creating Ingress %s. Ignoring - object already present",
             name,
         )
 
     # Done
     # ----
-    logging.info("Success! (name=%s namespace=%s)", name, namespace)
+    logging.info("Done %s (namespace=%s token=%s)", name, namespace, token)
 
     return {
         "notebook": {
