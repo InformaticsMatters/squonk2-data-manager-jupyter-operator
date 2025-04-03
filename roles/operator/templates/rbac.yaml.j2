@@ -30,7 +30,7 @@ rules:
   verbs: [create]
 - apiGroups: [apps, extensions, '']
   resources: [pods, persistentvolumeclaims, deployments, configmaps, services]
-  verbs: [create]
+  verbs: [create, get]
 - apiGroups: [networking.k8s.io]
   resources: [ingresses]
   verbs: [create]
