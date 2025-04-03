@@ -1,5 +1,6 @@
 """A kopf handler for the Jupyter CRD."""
 
+import json
 import logging
 import random
 import os
@@ -132,7 +133,11 @@ def create_v1alpha3(
     raise kopf.PermanentError("No longer supported")
 
 
-@kopf.on.create("squonk.it", "v2", "jupyternotebooks", id="jupyter")
+# For TEMPORARY errors (i.e. those that are not kopf.PermanentError)
+# we retry after 20 seconds and only retry 4 times
+@kopf.on.create(
+    "squonk.it", "v2", "jupyternotebooks", id="jupyter", backoff=20, retries=4
+)
 def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[str, Any]:
     """Handler for CRD create events.
     Here we construct the required Kubernetes objects,
@@ -142,9 +147,6 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
     We handle errors typically raising 'kopf.PermanentError' to prevent
     Kubernetes constantly calling back for a given create.
     """
-
-    characters = string.ascii_letters + string.digits
-    token = "".join(random.sample(characters, 16))
 
     logging.info("Starting create (name=%s namespace=%s)...", name, namespace)
     logging.info("spec=%s (name=%s)", spec, name)
@@ -201,7 +203,62 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
     # ConfigMaps
     # ----------
 
+    core_api = kubernetes.client.CoreV1Api()
+
+    # We might be here as another attempt to create the same application
+    # (an exception may have caused a prior execution to fail).
+    # The operator is configured to re-try on such occasions
+    # (with a period based on out 'backoff' value set in our decorator).
+    # Here, we need to check for the existence of the 'config' ConfigMap.
+    # If it exists, we read it and get the token we had previously set.
+    # If there is no ConfigMap (404) we are free to set a new token.
+    cm_name = f"config-{name}"
+    json_data_key = "jupyter_notebook_config.json"
+    token = ""
+    config_cm = None
+    try:
+        config_cm = core_api.read_namespaced_secret(cm_name, namespace)
+    except kubernetes.client.exceptions.ApiException as ex:
+        # We 'expect' 404, anything else is an error
+        if ex.status != 404:
+            logging.warning(
+                "Got ApiException [%s/%s] getting CONFIG ConfigMap",
+                ex.status,
+                ex.reason,
+            )
+            raise ex
+    if config_cm:
+        # We retrieved an existing CONFIG - extract the token from it
+        json_data = json.loads(config_cm.data[json_data_key])
+        token = json_data["ServerApp"]["token"]
+        logging.info("Retrieved prior token from CONFIG ConfigMap (%s)", token)
+    else:
+        # No prior config - we're free to allocate a new token
+        characters = string.ascii_letters + string.digits
+        token = "".join(random.sample(characters, 16))
+    assert token
+
     logging.info("Creating ConfigMaps %s...", name)
+
+    # We must handle (and ignore) 409 exceptions with the objects we create
+    # (with the reason 'Conflict'). This is interpreted as 'the object already exists'.
+    # At this point we do know whether the 'config' ConfigMap exists,
+    # so we don't need to create that again...
+
+    config_vars = {"token": token, "base_url": name}
+    config_cm_body = {
+        "apiVersion": "v1",
+        "kind": "ConfigMap",
+        "metadata": {"name": cm_name, "labels": {"app": name}},
+        "data": {json_data_key: _NOTEBOOK_CONFIG % config_vars},
+    }
+    kopf.adopt(config_cm_body)
+    if not config_cm:
+        # We create it because we know it does not exists.
+        # No exception handling - any exceptions just get passed up to kopf...
+        core_api.create_namespaced_config_map(
+            namespace, config_cm_body, _request_timeout=_REQUEST_TIMEOUT
+        )
 
     bp_cm_body = {
         "apiVersion": "v1",
@@ -209,49 +266,7 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
         "metadata": {"name": f"bp-{name}", "labels": {"app": name}},
         "data": {".bash_profile": _BASH_PROFILE},
     }
-
-    startup_cm_body = {
-        "apiVersion": "v1",
-        "kind": "ConfigMap",
-        "metadata": {"name": f"startup-{name}", "labels": {"app": name}},
-        "data": {"start.sh": _NOTEBOOK_STARTUP},
-    }
-
-    config_vars = {"token": token, "base_url": name}
-    config_cm_body = {
-        "apiVersion": "v1",
-        "kind": "ConfigMap",
-        "metadata": {"name": f"config-{name}", "labels": {"app": name}},
-        "data": {"jupyter_notebook_config.json": _NOTEBOOK_CONFIG % config_vars},
-    }
-
-    create_response = {
-        "notebook": {
-            "url": f"http://{ingress_domain}{ingress_path}?token={token}",
-            "token": token,
-            "interface": notebook_interface,
-        },
-        "image": image,
-        "serviceAccountName": service_account,
-        "resources": {
-            "requests": {"memory": memory_request},
-            "limits": {"memory": memory_limit},
-        },
-        "project": {"claimName": project_claim_name, "id": project_id},
-    }
-
     kopf.adopt(bp_cm_body)
-    kopf.adopt(startup_cm_body)
-    kopf.adopt(config_cm_body)
-    core_api = kubernetes.client.CoreV1Api()
-
-    # We currently see a number of 409 exceptions with the objects we create
-    # (with the reason 'Conflict'). As each one has a unique name
-    # we have to assume there is a serious underlying problem
-    # in kopf of kubernetes. For now, if the first object we create
-    # already exists let us assume they all do?
-    #
-    # Added as a work-around for sc-
     try:
         core_api.create_namespaced_config_map(
             namespace, bp_cm_body, _request_timeout=_REQUEST_TIMEOUT
@@ -261,9 +276,16 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
             raise ex
         # Warn, but ignore and return a valid 'create' response now.
         logging.warning(
-            "Got ApiException [409/Conflict] creating BP ConfigMap. Ignoring [#10]"
+            "Got ApiException [409/Conflict] creating BP ConfigMap. Ignoring"
         )
 
+    startup_cm_body = {
+        "apiVersion": "v1",
+        "kind": "ConfigMap",
+        "metadata": {"name": f"startup-{name}", "labels": {"app": name}},
+        "data": {"start.sh": _NOTEBOOK_STARTUP},
+    }
+    kopf.adopt(startup_cm_body)
     try:
         core_api.create_namespaced_config_map(
             namespace, startup_cm_body, _request_timeout=_REQUEST_TIMEOUT
@@ -273,19 +295,7 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
             raise ex
         # Warn, but ignore and return a valid 'create' response now.
         logging.warning(
-            "Got ApiException [409/Conflict] creating STARTUP ConfigMap. Ignoring [#10]"
-        )
-
-    try:
-        core_api.create_namespaced_config_map(
-            namespace, config_cm_body, _request_timeout=_REQUEST_TIMEOUT
-        )
-    except kubernetes.client.exceptions.ApiException as ex:
-        if ex.status != 409 or ex.reason != "Conflict":
-            raise ex
-        # Warn, but ignore and return a valid 'create' response now.
-        logging.warning(
-            "Got ApiException [409/Conflict] creating CONFIG ConfigMap. Ignoring [#10]"
+            "Got ApiException [409/Conflict] creating STARTUP ConfigMap. Ignoring"
         )
 
     logging.info("Created ConfigMaps")
@@ -400,8 +410,9 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
     # Add the instance owner (expected to have been extracted from a label)
     c_env.append({"name": "DM_INSTANCE_OWNER", "value": str(instance_owner)})
 
-    kopf.adopt(deployment_body)
     apps_api = kubernetes.client.AppsV1Api()
+
+    kopf.adopt(deployment_body)
     try:
         apps_api.create_namespaced_deployment(
             namespace, deployment_body, _request_timeout=_REQUEST_TIMEOUT
@@ -411,7 +422,7 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
             raise ex
         # Warn, but ignore and return a valid 'create' response now.
         logging.warning(
-            "Got ApiException [409/Conflict] creating CONFIG ConfigMap. Ignoring [#10]"
+            "Got ApiException [409/Conflict] creating CONFIG ConfigMap. Ignoring"
         )
 
     logging.info("Created deployment")
@@ -449,7 +460,7 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
             raise ex
         # Warn, but ignore and return a valid 'create' response now.
         logging.warning(
-            "Got ApiException [409/Conflict] creating CONFIG ConfigMap. Ignoring [#10]"
+            "Got ApiException [409/Conflict] creating CONFIG ConfigMap. Ignoring"
         )
 
     logging.info("Created service")
@@ -497,8 +508,9 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
         annotations = ingress_body["metadata"]["annotations"]
         annotations["cert-manager.io/cluster-issuer"] = ingress_cert_issuer
 
-    kopf.adopt(ingress_body)
     ext_api = kubernetes.client.NetworkingV1Api()
+
+    kopf.adopt(ingress_body)
     try:
         ext_api.create_namespaced_ingress(
             namespace, ingress_body, _request_timeout=_REQUEST_TIMEOUT
@@ -508,12 +520,24 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
             raise ex
         # Warn, but ignore and return a valid 'create' response now.
         logging.warning(
-            "Got ApiException [409/Conflict] creating CONFIG ConfigMap. Ignoring [#10]"
+            "Got ApiException [409/Conflict] creating CONFIG ConfigMap. Ignoring"
         )
 
     logging.info("Created ingress")
 
     # Done
     # ----
-
-    return create_response
+    return {
+        "notebook": {
+            "url": f"http://{ingress_domain}{ingress_path}?token={token}",
+            "token": token,
+            "interface": notebook_interface,
+        },
+        "image": image,
+        "serviceAccountName": service_account,
+        "resources": {
+            "requests": {"memory": memory_request},
+            "limits": {"memory": memory_limit},
+        },
+        "project": {"claimName": project_claim_name, "id": project_id},
+    }
