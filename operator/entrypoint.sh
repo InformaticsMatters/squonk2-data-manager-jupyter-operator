@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-kopf run ./handlers.py --verbose --standalone --all-namespaces --log-format full
+kopf run ./handlers.py --standalone --all-namespaces --log-format full ${KOPF_EXTRA_OPTIONS}
