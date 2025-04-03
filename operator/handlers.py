@@ -134,9 +134,9 @@ def create_v1alpha3(
 
 
 # For TEMPORARY errors (i.e. those that are not kopf.PermanentError)
-# we retry after 20 seconds and only retry 4 times
+# we retry after 20 seconds and only retry 6 times
 @kopf.on.create(
-    "squonk.it", "v2", "jupyternotebooks", id="jupyter", backoff=20, retries=4
+    "squonk.it", "v2", "jupyternotebooks", id="jupyter", backoff=20, retries=6
 )
 def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[str, Any]:
     """Handler for CRD create events.
@@ -236,6 +236,9 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
         # No prior config - we're free to allocate a new token
         characters = string.ascii_letters + string.digits
         token = "".join(random.sample(characters, 16))
+        logging.info(
+            "No prior CONFIG ConfigMap exists, assigning new token (%s)", token
+        )
     assert token
 
     logging.info("Creating ConfigMaps %s...", name)
