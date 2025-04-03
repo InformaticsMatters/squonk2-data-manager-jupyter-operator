@@ -217,7 +217,7 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
     token = ""
     config_cm = None
     try:
-        config_cm = core_api.read_namespaced_secret(cm_name, namespace)
+        config_cm = core_api.read_namespaced_config_map(cm_name, namespace)
     except kubernetes.client.exceptions.ApiException as ex:
         # We 'expect' 404, anything else is an error
         if ex.status != 404:
