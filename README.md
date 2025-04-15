@@ -132,16 +132,12 @@ a suitable set of parameters: -
 Then, you must run the `site_dm` playbook to for each Data Manager
 you wish to configure: -
 
-    ansible-playbook -e @${PARAMS}-parameters.yaml \
-        -e jo_dmapi_namespace=data-manager-api-dev \
-        site_dm.yaml
+    ansible-playbook -e xchem-dev-integration-parameters.yaml site_dm.yaml
 
-    ansible-playbook -e @${PARAMS}-parameters.yaml \
-        -e jo_dmapi_namespace=data-manager-api-test \
-        site_dm.yaml
+    ansible-playbook -e xchem-dev-test-parameters.yaml site_dm.yaml
 
-This wil install the RBAC and configuration objects for Jupyter
-to the DM namespace.
+This will install the RBAC and configuration objects for Jupyter
+to the corresponding DM namespaces.
 
 # Data Manager Application Compliance
 In order to expose the CRD as an _Application_ in the Data Manager API service

@@ -1,9 +1,9 @@
 ---
 
-jo_image_tag: 19.2.2
+jo_image_tag: 31.0.11
 jo_dmapi_namespace: data-manager-api-test
 
-jo_ingress_domain: data-manager.xchem-dev.diamond.ac.uk
+jo_ingress_domain: data-manager-test.xchem-dev.diamond.ac.uk
 jo_ingress_tls_secret: data-manager-api-tls
 jo_namespaces: data-manager-api-dev:data-manager-api-integration:data-manager-api-test
 jo_pod_node_selector_key: informaticsmatters.com/purpose
