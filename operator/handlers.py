@@ -88,9 +88,9 @@ if [ ! -f ~/jupyter_notebook_config.json ]; then
     cp /etc/jupyter_notebook_config.json ~
 fi
 
-if [ -d /home/code/copy-to-home ]; then
-    echo "Copying copy-to-home content"
-    cp -r -u /home/code/copy-to-home/* ~
+if [ -d /home/code/copy-to-startup ]; then
+    echo "Copying copy-to-startup content"
+    cp -r -u /home/code/copy-to-startup/* ~/..
 fi
 
 jupyter lab --config=~/jupyter_notebook_config.json

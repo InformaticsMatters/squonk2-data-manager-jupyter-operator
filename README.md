@@ -239,10 +239,13 @@ Both are exposed in the example parameter file `example-parameters.yaml`.
 A number of key files are prepared by the built-in `/usr/local/bin/start.sh` script
 that the operator creates (via a **ConfigMap**). This script, used as the
 container's **command**, will also recursively copy the content of the container image's
-`/home/code/copy-to-home` directory (if it exists) to `~` prior to running Jupyter.
+`/home/code/copy-to-startup` directory (if it exists) to the parent of the
+`$HOME` (`~`) directory (the parent of the instance directory) prior to
+running Jupyter.
+
 The script copies files using the command: -
 
-    cp -r -u /home/code/copy-to-home/* ~
+    cp -r -u /home/code/copy-to-home/* ~/..
 
 ---
 
