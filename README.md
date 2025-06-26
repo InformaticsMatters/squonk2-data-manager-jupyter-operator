@@ -245,7 +245,7 @@ running Jupyter.
 
 The script copies files using the command: -
 
-    cp -r -u /home/code/copy-to-home/* ~/..
+    cp -r -u /home/code/copy-to-startup/* ~/..
 
 ---
 
