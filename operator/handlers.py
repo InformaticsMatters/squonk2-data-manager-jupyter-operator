@@ -90,7 +90,7 @@ fi
 
 if [ -d /home/code/copy-to-home ]; then
     echo "Copying copy-to-home content"
-    cp -R -u /home/code/copy-to-home/* ~
+    cp -r -u /home/code/copy-to-home/* ~
 fi
 
 jupyter lab --config=~/jupyter_notebook_config.json
