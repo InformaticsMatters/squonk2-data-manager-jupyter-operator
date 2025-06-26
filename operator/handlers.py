@@ -59,11 +59,11 @@ _POD_NODE_SELECTOR_KEY: str = os.environ.get(
 )
 _POD_NODE_SELECTOR_VALUE: str = os.environ.get("JO_POD_NODE_SELECTOR_VALUE", "yes")
 
-# A custom startup script.
-# This is executed as the container "command"
-# It writes a new a .bashrc and copies
-# the .bash_profile and jupyter_notebook_config.json file into place
-# before running 'jupyter lab'.
+# A custom startup script, executed as the container "command".
+#
+# It writes a new a .bashrc, copies the .bash_profile and jupyter_notebook_config.json
+# files into place and then copies the file tree from /home/code/copy-to-home
+# to the user's home directory before running 'jupyter lab'.
 #
 # Working directory is the Project directory,
 # and HOME is the project instance directory
@@ -86,6 +86,11 @@ fi
 if [ ! -f ~/jupyter_notebook_config.json ]; then
     echo "Copying config into place"
     cp /etc/jupyter_notebook_config.json ~
+fi
+
+if [ -d /home/code/copy-to-home ]; then
+    echo "Copying copy-to-home content"
+    cp -R -u /home/code/copy-to-home/* ~
 fi
 
 jupyter lab --config=~/jupyter_notebook_config.json
