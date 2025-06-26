@@ -235,6 +235,15 @@ certificate issuer name using the playbook variable `jo_ingress_cert_issuer`.
 
 Both are exposed in the example parameter file `example-parameters.yaml`.
 
+## Populating the home directory
+A number of key files are prepared by the built-in `/usr/local/bin/start.sh` script
+that the operator creates (via a **ConfigMap**). This script, used as the
+container's **command**, will also recursively copy the content of the container image's
+`/home/code/copy-to-home` directory (if it exists) to `~` prior to running Jupyter.
+The script copies files using the command: -
+
+    cp -r -u /home/code/copy-to-home/* ~
+
 ---
 
 [ansible]: https://www.ansible.com
