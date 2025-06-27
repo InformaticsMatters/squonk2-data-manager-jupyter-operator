@@ -8,6 +8,7 @@
 
 jo_kubeconfig: "{{ lookup('env', 'KUBECONFIG') }}"
 
-jo_image_tag: "{{ lookup('env', 'IM_DEV_JUPO_IMAGE_TAG') | default('23.0.0', True) }}"
+jo_namespace: im-data-manager-jupyter-operator
+jo_image_tag: "{{ lookup('env', 'IM_DEV_JUPO_IMAGE_TAG') | default('31.1.1', True) }}"
 jo_ingress_domain: squonk2
 jo_dmapi_namespace: im-data-manager
