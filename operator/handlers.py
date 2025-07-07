@@ -413,11 +413,14 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
     # If we find a key ending with '/owner', keep it
     # (for use as an environment variable later)
     instance_owner = "Unknown"
+    instance_id = "Unknown"
     for label in material.get("labels", []):
         key, value = label.split("=")
         deployment_body["spec"]["template"]["metadata"]["labels"][key] = value
         if key.endswith("/owner"):
             instance_owner = value
+        elif key.endswith("/instance-id"):
+            instance_id = value
 
     # To simplify the dynamic ENV adjustments we're about to make...
     c_env = deployment_body["spec"]["template"]["spec"]["containers"][0]["env"]
@@ -425,8 +428,11 @@ def create(spec: Dict[str, Any], name: str, namespace: str, **_: Any) -> Dict[st
     if notebook_interface != "classic":
         c_env.append({"name": "JUPYTER_ENABLE_LAB", "value": "true"})
 
-    # Add a Project UUID environment variable
+    # Add a Project and Instance UUID environment variables
+    # The project comes from the 'material->project' structure
+    # the instance comes from the provided "material->label''
     c_env.append({"name": "DM_PROJECT_ID", "value": str(project_id)})
+    c_env.append({"name": "DM_INSTANCE_ID", "value": str(instance_id)})
     # Add the instance owner (expected to have been extracted from a label)
     c_env.append({"name": "DM_INSTANCE_OWNER", "value": str(instance_owner)})
 
