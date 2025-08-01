@@ -40,13 +40,13 @@ repos:
     - py312
 # MyPy
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v1.15.0
+  rev: v1.17.0
   hooks:
   - id: mypy
     files: ^operator
 # Pylint
 - repo: https://github.com/pycqa/pylint
-  rev: v3.3.6
+  rev: v3.3.7
   hooks:
   - id: pylint
     files: ^operator
@@ -57,7 +57,7 @@ repos:
 # All files that end '.yaml' or '.yaml.j2'
 # See https://pre-commit.com/#filtering-files-with-types
 - repo: https://github.com/adrienverge/yamllint
-  rev: v1.37.0
+  rev: v1.37.1
   hooks:
   - id: yamllint
     types:

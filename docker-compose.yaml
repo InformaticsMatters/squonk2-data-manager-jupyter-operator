@@ -20,4 +20,4 @@ services:
   operator:
     build:
       context: operator
-    image: informaticsmatters/data-manager-jupyter-operator:${IMAGE_TAG:-19.2.0}
+    image: informaticsmatters/data-manager-jupyter-operator:${IMAGE_TAG:-33.0.0}

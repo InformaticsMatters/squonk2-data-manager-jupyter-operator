@@ -1,6 +1,6 @@
 ---
 
-jo_image_tag: 19.2.7
+jo_image_tag: 33.0.0
 jo_ingress_domain: kubernetes.docker.internal
 jo_namespaces: im-data-manager-api
 jo_namespace: im-data-manager-jupyter-operator

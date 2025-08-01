@@ -1,6 +1,6 @@
 ---
 
-jo_image_tag: 19.2.2
+jo_image_tag: 33.0.0
 jo_dmapi_namespace: data-manager-api-dev
 
 jo_ingress_domain: data-manager.xchem-dev.diamond.ac.uk

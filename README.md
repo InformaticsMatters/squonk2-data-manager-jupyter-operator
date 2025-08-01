@@ -6,9 +6,7 @@
 ![Architecture](https://img.shields.io/badge/architecture-amd64%20%7C%20arm64-lightgrey)
 
 [![build](https://github.com/informaticsmatters/squonk2-data-manager-jupyter-operator/actions/workflows/build.yaml/badge.svg)](https://github.com/informaticsmatters/squonk2-data-manager-jupyter-operator/actions/workflows/build.yaml)
-[![build latest](https://github.com/informaticsmatters/squonk2-data-manager-jupyter-operator/actions/workflows/build-latest.yaml/badge.svg)](https://github.com/informaticsmatters/squonk2-data-manager-jupyter-operator/actions/workflows/build-latest.yaml)
 [![build tag](https://github.com/informaticsmatters/squonk2-data-manager-jupyter-operator/actions/workflows/build-tag.yaml/badge.svg)](https://github.com/informaticsmatters/squonk2-data-manager-jupyter-operator/actions/workflows/build-tag.yaml)
-[![build stable](https://github.com/informaticsmatters/squonk2-data-manager-jupyter-operator/actions/workflows/build-stable.yaml/badge.svg)](https://github.com/informaticsmatters/squonk2-data-manager-jupyter-operator/actions/workflows/build-stable.yaml)
 
 ![GitHub](https://img.shields.io/github/license/informaticsmatters/squonk2-data-manager-jupyter-operator)
 
@@ -34,7 +32,7 @@ Prerequisites: -
 -   Python
 -   Docker
 -   A kubernetes config file
--   A compatible Kubernetes (e.g. 1.22 thru 1.24 if the operator is built for 1.23)
+-   A compatible Kubernetes (e.g. 1.32 thru 1.34 if the operator is built for 1.33)
 
 ## Contributing
 The project uses: -
@@ -69,7 +67,7 @@ is automatically built and pushed to Docker Hub using GitHub Actions.
 You can build and push the image yourself using docker-compose.
 The following will build an operator image with a specific tag: -
 
-    export IMAGE_TAG=23.1.0-alpha.1
+    export IMAGE_TAG=34.0.0-alpha.1
     docker compose build
     docker compose push
 
@@ -83,7 +81,6 @@ environment using the requirements in the root of the project...
     source venv/bin/activate
     pip install --upgrade pip
     pip install -r requirements.txt
-    ansible-galaxy install -r requirements.yaml
 
 Set your KUBECONFIG for the cluster and verify its right: -
 
