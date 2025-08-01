@@ -39,7 +39,6 @@ jobs:
         pip install --upgrade pip
         pip install -r build-requirements.txt
         pip install -r requirements.txt
-        ansible-galaxy install -r requirements.yaml
     - name: Lint
       run: |
         pre-commit run --all-files
