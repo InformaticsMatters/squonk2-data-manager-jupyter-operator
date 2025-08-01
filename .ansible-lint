@@ -5,3 +5,4 @@ skip_list:
 - yaml  # Violations reported by yamllint.
 warn_list:
 - fqcn-builtins  # Use FQCN for builtin actions.
+- var-naming[no-role-prefix]
