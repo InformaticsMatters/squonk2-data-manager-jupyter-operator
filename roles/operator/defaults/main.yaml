@@ -41,3 +41,7 @@ jo_pod_node_selector_value: 'yes'
 
 # Apply Priority Class to Pods launched
 jo_apply_pod_priority_class: no
+
+# Costing information
+jo_cost_cost: '1.0'
+jo_cost_period: '1 hour'
