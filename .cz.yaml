@@ -15,12 +15,12 @@ commitizen:
   # and didn't have everything ready for change-logs.
   changelog_start_rev: 19.1.0
   customize:
-    schema_pattern: "^(?P<change_type>feat|fix|perf|refactor|remove|style|test|build|docs|ci|BREAKING CHANGE)(?:\\((?P<scope>[^()\\r\\n]*)\\)|\\()?(?P<breaking>!)?:\\s(?P<message>.*)?"
-    commit_parser: "^(?P<change_type>feat|fix|perf|refactor|remove|style|test|build|docs|ci|BREAKING CHANGE)(?:\\((?P<scope>[^()\\r\\n]*)\\)|\\()?(?P<breaking>!)?:\\s(?P<message>.*)?"
+    schema_pattern: "^(?P<change_type>feat|fix|perf|refactor|remove|style|test|build|docs|ci|chore|BREAKING CHANGE)(?:\\((?P<scope>[^()\\r\\n]*)\\)|\\()?(?P<breaking>!)?:\\s(?P<message>.*)?"
+    commit_parser: "^(?P<change_type>feat|fix|perf|refactor|remove|style|test|build|docs|ci|chore|BREAKING CHANGE)(?:\\((?P<scope>[^()\\r\\n]*)\\)|\\()?(?P<breaking>!)?:\\s(?P<message>.*)?"
     # The changelog_pattern identifies the commit types
     # that will be included.
     # Build the changelog with 'cz ch' on the staging or production branches.
-    changelog_pattern: "^(feat|fix|perf|refactor|remove|style|test|build|docs|ci)?"
+    changelog_pattern: "^(feat|fix|perf|refactor|remove|style|test|build|docs|ci|chore)?"
     # A mapping of type to its group name in the changelog.
     # We call 'feat' commits 'New Features'
     change_type_map:
@@ -33,6 +33,7 @@ commitizen:
       remove: Removed
       style: Stylistic Changes
       ci: CI/CD
+      chore: Chore
       test: Testing
     # The order of commit types in the changelog...
     change_type_order:
@@ -45,4 +46,5 @@ commitizen:
     - "test"
     - "build"
     - "ci"
+    - "chore"
     - "docs"
