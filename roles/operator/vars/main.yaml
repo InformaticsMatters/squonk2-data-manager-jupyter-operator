@@ -1,9 +1,0 @@
----
-
-# The Job Operator Pod Security Policy (PSP)
-jo_sa_psp: im-core-unrestricted
-
-jo_cpu_request: 100m
-jo_mem_request: 256Mi
-jo_cpu_limit: 1000m
-jo_mem_limit: 256Mi

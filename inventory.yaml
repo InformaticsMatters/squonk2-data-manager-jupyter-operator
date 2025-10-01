@@ -1,8 +1,0 @@
----
-all:
-  vars:
-    ansible_connection: local
-  children:
-    server:
-      hosts:
-        localhost:

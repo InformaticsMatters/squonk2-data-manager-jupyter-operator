@@ -8,7 +8,6 @@ yaml-files:
 ignore: |
   .github/
   venv/
-  roles/operator/templates/deployment.yaml.j2
 
 rules:
   indentation:

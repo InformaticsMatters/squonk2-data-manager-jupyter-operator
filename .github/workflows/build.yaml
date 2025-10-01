@@ -38,11 +38,9 @@ jobs:
       run: |
         pip install --upgrade pip
         pip install -r build-requirements.txt
-        pip install -r requirements.txt
     - name: Lint
       run: |
         pre-commit run --all-files
-        ansible-lint
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
     - name: Set up Docker Buildx

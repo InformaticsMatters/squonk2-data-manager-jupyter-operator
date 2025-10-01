@@ -1,7 +1,0 @@
----
-- name: Localhost
-  hosts: localhost
-  tasks:
-  - name: Operator
-    ansible.legacy.include_role:
-      name: operator
