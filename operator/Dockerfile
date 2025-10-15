@@ -1,4 +1,4 @@
-FROM python:3.12.11-slim
+FROM python:3.13.8-slim
 
 # Labels
 LABEL maintainer='Alan Christie <achristie@informaticsmatters.com>'
